@@ -1,4 +1,4 @@
-# RaiSED
+# RadioSED
 
 ## A Bayesian Nested Sampling approach to radio SED fitting for AGN.
 
@@ -28,17 +28,17 @@ More documentation coming soon!
 
 ## Usage
 
-To run RaiSED you will obviously need both [Bilby](https://lscsoft.docs.ligo.org/bilby/#) and [Dynesty](https://dynesty.readthedocs.io/en/latest/index.html), but additional 
+To run RadioSED you will obviously need both [Bilby](https://lscsoft.docs.ligo.org/bilby/#) and [Dynesty](https://dynesty.readthedocs.io/en/latest/index.html), but additional 
 package requirements can be found in `requirements.txt` (for pip-compatible formatting) or `requirements_conda.txt` (for anaconda-style formatting).  
-If you are running anaconda, once you clone this repo you can run `conda create --name raised --file requirements_conda.txt` from within the folder to create a new environment
-with all the packages required to run RaiSED.
+If you are running anaconda, once you clone this repo you can run `conda create --name radiosed --file requirements_conda.txt` from within the folder to create a new environment
+with all the packages required to run RadioSED.
 
 You will also need to have [Git Large File Storage](https://git-lfs.com/) installed in order to download the requisite files (you may need to do another `git pull` after installing the LFS
 in order to pull these files across). The necessary files are located within the `data\` subdirectory.
 
-If you would like to make use of the pre-determined crossmatches that come with RaiSED, you will need to initialise the DataParser with option `use_local=True`.
+If you would like to make use of the pre-determined crossmatches that come with RadioSED, you will need to initialise the DataParser with option `use_local=True`.
 
-To see how RaiSED is run, please take a look at the `run_raised.py` script. This can be used as the main script from which you run fitting on your own sources, or it can
+To see how RadioSED is run, please take a look at the `run_radiosed.py` script. This can be used as the main script from which you run fitting on your own sources, or it can
 be modified to suit your needs.
 
 If this code is of any use to you in your research, we would appreciate a reference to our forthcoming paper.
