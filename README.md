@@ -3,7 +3,11 @@
 ## A Bayesian Nested Sampling approach to radio SED fitting for AGN.
 
 This package uses nested sampling ([Skilling 2004](https://doi.org/10.1063/1.1835238)) to perform a Bayesian analysis of radio SEDs constructed from radio flux density measurements
-obtained as part of large area surveys (or in some limited cases, as part of targeted followup campaigns). Users can make use of a pre-defined set of models and surveys from which to draw
+obtained as part of large area surveys (or in some limited cases, as part of targeted followup campaigns). It is essentially a wrapper around [Bilby](https://lscsoft.docs.ligo.org/bilby/#),
+ the Bayesian inference library developed for Gravitational-wave astronomy, and it makes use of [Dynesty](https://dynesty.readthedocs.io/en/latest/index.html) to perform the sampling steps,
+ though other samplers could also be used thanks to Bilby's architecture.
+
+Users can make use of a pre-defined set of models and surveys from which to draw
 flux density measurements, or they can define their own models, and provide their own input flux density measurements. All flux density measurements are referenced against the RACS-LOW survey 
 ([Hale et al. 2021](https://ui.adsabs.harvard.edu/abs/2021PASA...38...58H/abstract)), and source names and IDs from the survey catalogue are used as identifiers.
 
@@ -26,5 +30,7 @@ More documentation coming soon!
 
 To see how RaiSED is run, please take a look at the `run_raised.py` script. This can be used as the main script from which you run fitting on your own sources, or it can
 be modified to suit your needs.
+
+Package requirements can be found in `requirements.txt` (for pip-compatible formatting) or `requirements_conda.txt` (for anaconda-style formatting).
 
 If this code is of any use to you in your research, we would appreciate you reference our forthcoming paper.
