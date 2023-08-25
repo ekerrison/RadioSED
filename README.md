@@ -28,9 +28,10 @@ More documentation coming soon!
 
 ## Usage
 
+To run RaiSED you will obviously need both [Bilby](https://lscsoft.docs.ligo.org/bilby/#) and [Dynesty](https://dynesty.readthedocs.io/en/latest/index.html), but additional 
+package requirements can be found in `requirements.txt` (for pip-compatible formatting) or `requirements_conda.txt` (for anaconda-style formatting).
+
 To see how RaiSED is run, please take a look at the `run_raised.py` script. This can be used as the main script from which you run fitting on your own sources, or it can
 be modified to suit your needs.
-
-Package requirements can be found in `requirements.txt` (for pip-compatible formatting) or `requirements_conda.txt` (for anaconda-style formatting).
 
 If this code is of any use to you in your research, we would appreciate you reference our forthcoming paper.
