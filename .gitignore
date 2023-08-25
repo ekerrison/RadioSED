@@ -1,0 +1,7 @@
+__pycache__/
+old_runscripts/
+output/
+.DS_Store
+outdir/
+notes_list.md
+run_raised_test.py

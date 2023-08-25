@@ -1,0 +1,4 @@
+data/allsky_peak_masterlist.csv filter=lfs diff=lfs merge=lfs -text
+data/included_surveys_final.csv filter=lfs diff=lfs merge=lfs -text
+data/allsky_almacal_masterlist.csv filter=lfs diff=lfs merge=lfs -text
+data/allsky_masterlist.csv filter=lfs diff=lfs merge=lfs -text
