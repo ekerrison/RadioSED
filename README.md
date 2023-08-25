@@ -34,4 +34,4 @@ package requirements can be found in `requirements.txt` (for pip-compatible form
 To see how RaiSED is run, please take a look at the `run_raised.py` script. This can be used as the main script from which you run fitting on your own sources, or it can
 be modified to suit your needs.
 
-If this code is of any use to you in your research, we would appreciate you reference our forthcoming paper.
+If this code is of any use to you in your research, we would appreciate a reference to our forthcoming paper.
