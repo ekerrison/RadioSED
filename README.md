@@ -31,6 +31,9 @@ More documentation coming soon!
 To run RaiSED you will obviously need both [Bilby](https://lscsoft.docs.ligo.org/bilby/#) and [Dynesty](https://dynesty.readthedocs.io/en/latest/index.html), but additional 
 package requirements can be found in `requirements.txt` (for pip-compatible formatting) or `requirements_conda.txt` (for anaconda-style formatting).
 
+If you are running anaconda, once you clone this repo you can run `conda create --name raised --file requirements_conda.txt` from within the folder to create a new environment
+with all the packages required to run RaiSED.
+
 To see how RaiSED is run, please take a look at the `run_raised.py` script. This can be used as the main script from which you run fitting on your own sources, or it can
 be modified to suit your needs.
 
