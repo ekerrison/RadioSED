@@ -24,6 +24,16 @@ This can then be fed into the `Fitter` class much like the pre-defined models.
 
 ## Structure
 
+All of the code has designed to be fairly modular. You can use the builtin `retrieve_fluxdata_local()` and `retrieve_fluxdata_remote()` functions to build up a radio SED using a pre-defined set of radio
+surveys, or you can feed in your own, custom dataset. If you choose to feed in your own, the code expects a Pandas DataFrame object, with columns labelled: 
+- Frequency (Hz)
+- Flux Density (Jy)
+- Uncertainty
+- Survey quickname
+- Refcode
+
+Where the 'survey quickname' is some easily identifiable name (e.g. RACS) and the Refcode is the bibcode for the relevant survey paper.
+
 More documentation coming soon!
 
 ## Usage
