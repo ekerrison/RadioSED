@@ -192,39 +192,30 @@ class SEDDataParser:
 
         # if alma has multiple fluxes at the same frequency (to the nearest 5ghz) that vary by more than 10 sigma, flag
         # this source as variable, and don't include fluxes in fitting
-        alma_variable = np.nan
-        if almacal_pts.shape[0] > 0:
-            almacal_pts["Freq_rounded"] = almacal_pts["Freq"].apply(
-                lambda x: 5 * round(x / 5)
-            )
-            max_flux_diff = almacal_pts.groupby("Freq_rounded")["Flux"].agg(np.ptp)
-            max_err = almacal_pts.groupby("Freq_rounded")["e_Flux"].max()
-            if (max_flux_diff > 10 * max_err).any():
-                alma_variable = True
-            else:
-                alma_variable = False
-                # add almacal to flux_data
-                alma_count = 0
-                for alma_idx in almacal_pts.index.tolist():
-                    flux_data.loc[
-                        append_flux_idx + 1 + alma_count, "Frequency (Hz)"
-                    ] = (almacal_pts.loc[alma_idx, "Freq"] * 1e9)
-                    flux_data.loc[
-                        append_flux_idx + 1 + alma_count, "Flux Density (Jy)"
-                    ] = almacal_pts.loc[alma_idx, "Flux"]
-                    flux_data.loc[
-                        append_flux_idx + 1 + alma_count, "Survey quickname"
-                    ] = "ALMACAL"
-                    flux_data.loc[
-                        append_flux_idx + 1 + alma_count, "Uncertainty"
-                    ] = almacal_pts.loc[alma_idx, "e_Flux"]
-                    flux_data.loc[
-                        append_flux_idx + 1 + alma_count, "Survey quickname"
-                    ] = "J/MNRAS/485/1188/acccat"
-                    flux_data.loc[
-                        append_flux_idx + 1 + alma_count, "Refcode"
-                    ] = "2019MNRAS.485.1188B"
-                    alma_count += 1
+        alma_variable = self.is_alma_variable(almacal_pts)
+        if not alma_variable:
+            # add almacal to flux_data
+            alma_count = 0
+            for alma_idx in almacal_pts.index.tolist():
+                flux_data.loc[
+                    append_flux_idx + 1 + alma_count, "Frequency (Hz)"
+                ] = (almacal_pts.loc[alma_idx, "Freq"] * 1e9)
+                flux_data.loc[
+                    append_flux_idx + 1 + alma_count, "Flux Density (Jy)"
+                ] = almacal_pts.loc[alma_idx, "Flux"]
+                flux_data.loc[
+                    append_flux_idx + 1 + alma_count, "Survey quickname"
+                ] = "ALMACAL"
+                flux_data.loc[
+                    append_flux_idx + 1 + alma_count, "Uncertainty"
+                ] = almacal_pts.loc[alma_idx, "e_Flux"]
+                flux_data.loc[
+                    append_flux_idx + 1 + alma_count, "Survey quickname"
+                ] = "J/MNRAS/485/1188/acccat"
+                flux_data.loc[
+                    append_flux_idx + 1 + alma_count, "Refcode"
+                ] = "2019MNRAS.485.1188B"
+                alma_count += 1
 
         # resort by frequency
         flux_data = flux_data.sort_values(by="Frequency (Hz)")
@@ -646,8 +637,10 @@ class SEDDataParser:
         alma_fluxes = self.query_vizier(
             cat=alma_cat, ra=ra, dec=dec, columns=alma_columns, radius=alma_radius
         )[0].to_pandas()
+        #check if variable
+        alma_variable = self.is_alma_variable(alma_fluxes)
         flux_idx = photometry_table.shape[0]
-        if alma_fluxes.shape[0] > 0:
+        if alma_fluxes.shape[0] > 0 and not alma_variable:
             for alma_idx in alma_fluxes.index.tolist():
                 photometry_table.loc[flux_idx + alma_idx + 1, "Frequency (Hz)"] = (
                     alma_fluxes.loc[alma_idx, "Freq"] * 1e3
@@ -674,6 +667,24 @@ class SEDDataParser:
         peak_phot_table.sort_values(by="Frequency (Hz)", inplace=True)
 
         return photometry_table, peak_phot_table
+
+
+    def is_alma_variable(self, almacal_data: pd.DataFrame):
+        """Function to determine whether the source exhibits variability
+        in the ALMA band, based on flux density measurements from the ALMA
+        calibrator catalogue (Bonato+2019). This is methodologically simple,
+        we just check to see if there is variability at the 10 sigma level
+        over multiple epochs of ALMA observations in small bands"""
+        if almacal_data.shape[0] > 0:
+            almacal_data["Freq_rounded"] = almacal_data["Freq"].apply(
+                lambda x: 5 * round(x / 5)
+            )
+            max_flux_diff = almacal_data.groupby("Freq_rounded")["Flux"].agg(np.ptp)
+            max_err = almacal_data.groupby("Freq_rounded")["e_Flux"].max()
+            if (max_flux_diff > 10 * max_err).any():
+                return True
+        
+        return False
 
     def add_survey_radius(self, survey_viz):
         """Function to add info automatically to the list of included surveys. Currently
