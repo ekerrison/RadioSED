@@ -3,8 +3,8 @@
 ## A Bayesian Nested Sampling approach to radio SED fitting for AGN.
 
 This package uses nested sampling ([Skilling 2004](https://doi.org/10.1063/1.1835238)) to perform a Bayesian analysis of radio SEDs constructed from radio flux density measurements
-obtained as part of large area surveys (or in some limited cases, as part of targeted followup campaigns). It is essentially a wrapper around [Bilby](https://lscsoft.docs.ligo.org/bilby/#),
- the Bayesian inference library developed for Gravitational-wave astronomy, and it makes use of [Dynesty](https://dynesty.readthedocs.io/en/latest/index.html) to perform the sampling steps,
+obtained as part of large area surveys (or in some limited cases, as part of targeted followup campaigns). It is a pure Python implementation, and is essentially a wrapper around [Bilby](https://lscsoft.docs.ligo.org/bilby/#),
+ the Bayesian inference library developed for Gravitational-wave astronomy. It makes use of [Dynesty](https://dynesty.readthedocs.io/en/latest/index.html) to perform the sampling steps,
  though other samplers could also be used thanks to Bilby's architecture.
 
 Users can make use of a pre-defined set of models and surveys from which to draw
@@ -50,6 +50,8 @@ If you would like to make use of the pre-determined crossmatches that come with 
 
 To see how RadioSED is run, please take a look at the `run_radiosed.py` script. This can be used as the main script from which you run fitting on your own sources, or it can
 be modified to suit your needs.
+
+## Citation
 
 If this code is of any use to you in your research, we would appreciate a reference to our forthcoming paper.
 
