@@ -52,3 +52,7 @@ To see how RadioSED is run, please take a look at the `run_radiosed.py` script. 
 be modified to suit your needs.
 
 If this code is of any use to you in your research, we would appreciate a reference to our forthcoming paper.
+
+## License
+
+RadioSED is an open source project made available under the GPLv3 license (see LICENCE file). If you require another license, please contact me.
