@@ -28,6 +28,11 @@ from auxiliary_info_functions import *
 fitter = Fitter(overwrite=False)
 plotter = Plotter(plotpath="output/model_plots/")
 priors = SEDPriors()
+# set use_local=True if you want to use the crossmatches that come pre-matched with RadioSED
+# this is the recommended setting for if you want to fit many sources (>20 or so) as it removes
+# the overheads from querying Vizier repeatedly. If you want to run RadioSED on a cluster/HPC
+# then you should probably set use_local=True, as repeated queries to Vizier may slow down 
+# traffic
 parser = SEDDataParser(use_local=False)
 
 # pick a source to fit!
@@ -43,6 +48,8 @@ src_ra, src_dec = resolve_name_racs(src_iau_name)
 flux_data, peak_flux_data = parser.retrieve_fluxdata_remote(
     iau_name=src_iau_name, racs_id=src_racs_name, ra=src_ra, dec=src_dec
 )
+
+#the same but using the local crossmatches
 # flux_data, peak_flux_data, alma_variable = parser.retrieve_fluxdata_local(iau_name = src_iau_name, racs_id = src_racs_name)
 
 # now initialise fitter
