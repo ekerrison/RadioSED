@@ -35,11 +35,17 @@ priors = SEDPriors()
 # traffic
 parser = SEDDataParser(use_local=False)
 
-# pick a source to fit!
+# pick a source to fit - we want the closest RACS source to this one
+src_iau_name_auto, ra, dec, separation = resolve_name_generic('J231351-472912')
+
+# or we know it's RACS ID
 src_racs_name = "RACS_2323-50A_5299"
 
 # get the iau name for this source in the RACS LOW catalogue
 src_iau_name = racs_id_to_name(src_racs_name)
+
+#check they are the same in this case
+print('names match: {}'.format(src_iau_name_auto == src_iau_name))
 
 # get its position
 src_ra, src_dec = resolve_name_racs(src_iau_name)
