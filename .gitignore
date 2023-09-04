@@ -4,4 +4,6 @@ output/
 .DS_Store
 outdir/
 notes_list.md
-run_raised_test.py
+run_radiosed_optimal_obs.py
+scripts/
+nestcheck_synthetic.py
