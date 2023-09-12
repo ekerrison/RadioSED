@@ -23,15 +23,16 @@ from SEDDataParser import SEDDataParser
 from helper_functions import *
 from auxiliary_info_functions import *
 
+#make necessary directories if they do not exist
+print('output directory exists: ', os.path.isdir(os.path.join(os.getcwd(), 'output')))
+if not os.path.isdir(os.path.join(os.getcwd(), 'output')):
+    os.mkdir(os.path.join(os.getcwd(), 'output'))
 
 # initialise all the various classes needed
 fitter = Fitter(overwrite=False)
 plotter = Plotter(plotpath="output/model_plots/")
 priors = SEDPriors()
 
-#make necessary directories if they do not exist
-if not os.path.isdir(os.path.join(os.getcwd(), 'output')):
-    os.mkdir(os.path.join(os.getcwd(), 'output'))
 # set use_local=True if you want to use the crossmatches that come pre-matched with RadioSED
 # this is the recommended setting for if you want to fit many sources (>20 or so) as it removes
 # the overheads from querying Vizier repeatedly. If you want to run RadioSED on a cluster/HPC
