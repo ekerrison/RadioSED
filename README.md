@@ -55,7 +55,7 @@ be modified to suit your needs.
 
 ## Citation
 
-If this code is of any use to you in your research, please use the DOI above to cite it directly. We would appreciate a reference to our forthcoming paper.
+If this code is of any use to you in your research, please use the DOI to cite it directly (https://zenodo.org/badge/latestdoi/682385260). You can cite either the latest release, or a specific release which your research made use of. We would also appreciate a reference to our forthcoming paper (details coming soon!).
 
 ## License
 
