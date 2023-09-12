@@ -1,5 +1,7 @@
 # RadioSED
 
+[![DOI](https://zenodo.org/badge/682385260.svg)](https://zenodo.org/badge/latestdoi/682385260)
+
 ## A Bayesian Nested Sampling approach to radio SED fitting for AGN.
 
 This package uses nested sampling ([Skilling 2004](https://doi.org/10.1063/1.1835238)) to perform a Bayesian analysis of radio SEDs constructed from radio flux density measurements
@@ -53,7 +55,7 @@ be modified to suit your needs.
 
 ## Citation
 
-If this code is of any use to you in your research, we would appreciate a reference to our forthcoming paper.
+If this code is of any use to you in your research, please use the DOI above to cite it directly. We would appreciate a reference to our forthcoming paper.
 
 ## License
 
