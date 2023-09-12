@@ -21,6 +21,7 @@ class Fitter:
         upper_freq=1e11,
         output_dir="output",
         overwrite=False,
+        use_nestcheck=False,
     ):
         """
         initialise default models to be fit
@@ -36,6 +37,7 @@ class Fitter:
         self.fit_min = lower_freq
         self.fit_max = upper_freq
         self.output_dir = output_dir
+        self.use_nestcheck = use_nestcheck
         return
 
     def update_data(self, data: pd.DataFrame, peak_data: pd.DataFrame, name: str):
@@ -89,6 +91,7 @@ class Fitter:
                 output_dir=self.output_dir,
                 george_model=george_model,
                 george_model_defaults=george_model_defaults,
+                use_nestcheck=self.use_nestcheck,
             )
         else:
             fit = RaiSEDModel(
@@ -100,6 +103,7 @@ class Fitter:
                 src_name=self.name,
                 plot_colour=plot_colour,
                 output_dir=self.output_dir,
+                use_nestcheck=self.use_nestcheck,
             )
         fit.setup_sampler(
             prior=prior_obj,

@@ -40,6 +40,7 @@ class RaiSEDModel:
         plot_colour="darkred",
         plot_linestyle="solid",
         savestr_end="",
+        use_nestcheck=False,
     ):
         # self.data = data
         self.model_type = model_type
@@ -55,6 +56,7 @@ class RaiSEDModel:
         self.gp = False
         self.param_intervals = dict()
         self.md = len(signature(self.__SED_func__).parameters) - 1
+        self.use_nestcheck=use_nestcheck
 
         # save suffix
         self.savestr_end = savestr_end
@@ -161,7 +163,7 @@ class RaiSEDModel:
                 npool=self.npool,
                 check_point=self.check_point,
                 nlive_init=self.nlive,
-                nestcheck=True,
+                nestcheck=self.use_nestcheck,
                 clean=self.overwrite,
                 n_effective=self.n_effective,
                 sample="rwalk",

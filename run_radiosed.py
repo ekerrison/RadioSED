@@ -29,7 +29,10 @@ if not os.path.isdir(os.path.join(os.getcwd(), 'output')):
     os.mkdir(os.path.join(os.getcwd(), 'output'))
 
 # initialise all the various classes needed
-fitter = Fitter(overwrite=False)
+#NOTE nestcheck must be installed directly from the github repo, as 
+#changes have been made since the last release to ensure it works with dynamic nested
+#sampling from dynesty using batch sampling (see: https://github.com/ejhigson/nestcheck/pull/9)
+fitter = Fitter(overwrite=False, use_nestcheck=False)
 plotter = Plotter(plotpath="output/model_plots/")
 priors = SEDPriors()
 
