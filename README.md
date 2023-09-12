@@ -39,8 +39,8 @@ More documentation coming soon!
 ## Usage
 
 To run RadioSED you will obviously need both [Bilby](https://lscsoft.docs.ligo.org/bilby/#) and [Dynesty](https://dynesty.readthedocs.io/en/latest/index.html), but additional 
-package requirements can be found in `requirements.txt` (for pip-compatible formatting) or `requirements_conda.txt` (for anaconda-style formatting).  
-If you are running anaconda, once you clone this repo you can run `conda create --name radiosed --file requirements_conda.txt` from within the folder to create a new environment
+package requirements can be found in `requirements.txt` (for pip-compatible formatting) or `environment.yml` (for anaconda-style formatting).  
+If you are running anaconda or miniconda, once you clone this repo you can run `conda env create -n radiosed -f environment.yml` from within the folder to create a new environment
 with all the packages required to run RadioSED.
 
 You will also need to have [Git Large File Storage](https://git-lfs.com/) installed in order to download the requisite files (you may need to do another `git pull` after installing the LFS
