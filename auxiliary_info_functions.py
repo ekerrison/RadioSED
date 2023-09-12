@@ -116,7 +116,18 @@ def resolve_name_generic(iau_name, racs_viz=racs_vizier):
     racs_coord = Coord.SkyCoord(
         ra=res["RAJ2000"].values[0] * u.deg, dec=res["DEJ2000"].values[0] * u.deg
     )
-    separation = racs_coord.separation(result)
+
+    #add coord objects to calculate separation
+    res['coords'] = res.apply(lambda x: Coord.SkyCoord(
+        ra=x.RAJ2000 * u.deg, dec=x.DEJ2000 * u.deg),
+        axis = 1)
+
+    res['sep'] = res.apply(lambda x: result.separation(x.coords), axis = 1)
+    
+    #return closest source
+    res = res.sort_values(by = 'sep')
+
+    separation = separation = res['sep'].values[0]
 
     if separation.deg * 60 * 60 > 60:
         raise IndexError(
