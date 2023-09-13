@@ -485,8 +485,8 @@ class SEDDataParser:
                         current_flux_val = current_flux_val / 1000
                         current_flux_err = current_flux_err / 1000
 
-                    # make sure NOT VLSSr which is peak only:
-                    if not surveys_used.loc[idx, "Name"] == "VLSSr":
+                    # make sure NOT VLSSr which is peak only, and not a masked flux value (NaN) from the query
+                    if not surveys_used.loc[idx, "Name"] == "VLSSr" and not isinstance(current_flux_val, np.ma.core.MaskedConstant):
                         # append to table to return
                         single_row = pd.DataFrame(
                             {
@@ -500,8 +500,6 @@ class SEDDataParser:
                                 "Survey quickname": [surveys_used.loc[idx, "Name"]],
                             }
                         )
-                        print('row for survey {}:'.format(surveys_used.loc[idx, "Name"]))
-                        print(single_row)
                         photometry_table = pd.concat(
                             [photometry_table, single_row], ignore_index=True, axis=0
                         )
@@ -607,48 +605,52 @@ class SEDDataParser:
                                 peak_current_flux_val = peak_current_flux_val / 1000
                                 peak_current_flux_err = peak_current_flux_err / 1000
 
-                            # print('before')
-                            # print(peak_phot_table)
-                            peak_single_row = pd.DataFrame(
-                                {
-                                    "Frequency (Hz)": [peak_current_freq],
-                                    "Flux Density (Jy)": [peak_current_flux_val],
-                                    "Uncertainty": [peak_current_flux_err],
-                                    "Survey quickname": [
-                                        surveys_used.loc[idx, "Vizier name"]
-                                    ],
-                                    "Refcode": [surveys_used.loc[idx, "bibcode"]],
-                                    "Survey quickname": [surveys_used.loc[idx, "Name"]],
-                                }
-                            )
-                            peak_phot_table = pd.concat(
-                                [peak_phot_table, peak_single_row],
-                                ignore_index=True,
-                                axis=0,
-                            )
+                            #check to remove masked fluxes
+                            if not isinstance(peak_current_flux_val, np.ma.core.MaskedConstant):
+                                peak_single_row = pd.DataFrame(
+                                    {
+                                        "Frequency (Hz)": [peak_current_freq],
+                                        "Flux Density (Jy)": [peak_current_flux_val],
+                                        "Uncertainty": [peak_current_flux_err],
+                                        "Survey quickname": [
+                                            surveys_used.loc[idx, "Vizier name"]
+                                        ],
+                                        "Refcode": [surveys_used.loc[idx, "bibcode"]],
+                                        "Survey quickname": [surveys_used.loc[idx, "Name"]],
+                                    }
+                                )
+                                peak_phot_table = pd.concat(
+                                    [peak_phot_table, peak_single_row],
+                                    ignore_index=True,
+                                    axis=0,
+                                )
 
         # now add almacal if it exists!
+        print(alma_cat, ra, dec, alma_columns, alma_radius)
         alma_fluxes = self.query_vizier(
             cat=alma_cat, ra=ra, dec=dec, columns=alma_columns, radius=alma_radius
-        )[0].to_pandas()
-        #check if variable
-        alma_variable = self.is_alma_variable(alma_fluxes)
-        flux_idx = photometry_table.shape[0]
-        if alma_fluxes.shape[0] > 0 and not alma_variable:
-            for alma_idx in alma_fluxes.index.tolist():
-                photometry_table.loc[flux_idx + alma_idx + 1, "Frequency (Hz)"] = (
-                    alma_fluxes.loc[alma_idx, "Freq"] * 1e3
-                )
-                photometry_table.loc[
-                    flux_idx + alma_idx + 1, "Flux Density (Jy)"
-                ] = alma_fluxes.loc[alma_idx, "Flux"]
-                photometry_table.loc[
-                    flux_idx + alma_idx + 1, "Uncertainty"
-                ] = alma_fluxes.loc[alma_idx, "e_Flux"]
-                photometry_table.loc[
-                    flux_idx + alma_idx + 1, "Survey quickname"
-                ] = "ALMACAL"
-                photometry_table.loc[flux_idx + alma_idx + 1, "Refcode"] = alma_refcode
+        )
+        
+        if len(alma_fluxes) > 0:
+            alma_fluxes = alma_fluxes[0].to_pandas()
+            #check if variable
+            alma_variable = self.is_alma_variable(alma_fluxes)
+            flux_idx = photometry_table.shape[0]
+            if alma_fluxes.shape[0] > 0 and not alma_variable:
+                for alma_idx in alma_fluxes.index.tolist():
+                    photometry_table.loc[flux_idx + alma_idx + 1, "Frequency (Hz)"] = (
+                        alma_fluxes.loc[alma_idx, "Freq"] * 1e3
+                    )
+                    photometry_table.loc[
+                        flux_idx + alma_idx + 1, "Flux Density (Jy)"
+                    ] = alma_fluxes.loc[alma_idx, "Flux"]
+                    photometry_table.loc[
+                        flux_idx + alma_idx + 1, "Uncertainty"
+                    ] = alma_fluxes.loc[alma_idx, "e_Flux"]
+                    photometry_table.loc[
+                        flux_idx + alma_idx + 1, "Survey quickname"
+                    ] = "ALMACAL"
+                    photometry_table.loc[flux_idx + alma_idx + 1, "Refcode"] = alma_refcode
 
         # now sort the table so that it is in ascending frequency order
         photometry_table["Frequency (Hz)"] = (
@@ -659,6 +661,11 @@ class SEDDataParser:
         )
         photometry_table.sort_values(by="Frequency (Hz)", inplace=True)
         peak_phot_table.sort_values(by="Frequency (Hz)", inplace=True)
+
+        #now remove any entries that do not have a flux density
+        photometry_table = photometry_table[~pd.isnull(photometry_table['Frequency (Hz)'])]
+        peak_phot_table = peak_phot_table[~pd.isnull(peak_phot_table['Frequency (Hz)'])]
+
 
         return photometry_table, peak_phot_table
 

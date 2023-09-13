@@ -60,7 +60,7 @@ src_ra, src_dec = resolve_name_racs(src_iau_name)
 
 # get all of the various flux density measurements associated with this source
 flux_data, peak_flux_data = parser.retrieve_fluxdata_remote(
-    iau_name=src_iau_name, racs_id=racs_id, ra=src_ra, dec=src_dec
+    iau_name=src_iau_name, racs_id=racs_id, ra=ra, dec=dec
 )
 
 #the same but using the local crossmatches
