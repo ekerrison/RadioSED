@@ -44,7 +44,7 @@ priors = SEDPriors()
 parser = SEDDataParser(use_local=False)
 
 # pick a source to fit - we want the closest RACS source to this one
-src_iau_name_auto, ra, dec, separation = resolve_name_generic('J231351-472912')
+src_iau_name_auto, ra, dec, separation, racs_id = resolve_name_generic('J215924-241752')
 
 # or we know it's RACS ID
 src_racs_name = "RACS_2323-50A_5299"
@@ -60,7 +60,7 @@ src_ra, src_dec = resolve_name_racs(src_iau_name)
 
 # get all of the various flux density measurements associated with this source
 flux_data, peak_flux_data = parser.retrieve_fluxdata_remote(
-    iau_name=src_iau_name, racs_id=src_racs_name, ra=src_ra, dec=src_dec
+    iau_name=src_iau_name, racs_id=racs_id, ra=src_ra, dec=src_dec
 )
 
 #the same but using the local crossmatches

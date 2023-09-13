@@ -135,10 +135,11 @@ def resolve_name_generic(iau_name, racs_viz=racs_vizier):
         )
 
     racs_name = res["RACS-DR1"].values[0]
+    racs_id = res["ID"].values[0]
     ra = res["RAJ2000"].values[0]
     dec = res["DEJ2000"].values[0]
 
-    return racs_name, ra, dec, separation
+    return racs_name, ra, dec, separation, racs_id
 
 
 def resolve_name_racs(racs_iau_name):

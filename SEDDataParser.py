@@ -346,7 +346,7 @@ class SEDDataParser:
                 alma_refcode = surveys_used.loc[idx, "bibcode"]
                 continue
 
-            # skip if RACS, we already have this presumably?
+            # simple RACS info
             if surveys_used.loc[idx, "Name"] == "RACS":
                 res = Vizier.query_constraints(
                     catalog=surveys_used.loc[idx, "Vizier name"],
@@ -500,6 +500,8 @@ class SEDDataParser:
                                 "Survey quickname": [surveys_used.loc[idx, "Name"]],
                             }
                         )
+                        print('row for survey {}:'.format(surveys_used.loc[idx, "Name"]))
+                        print(single_row)
                         photometry_table = pd.concat(
                             [photometry_table, single_row], ignore_index=True, axis=0
                         )
@@ -537,15 +539,13 @@ class SEDDataParser:
                                 peak_cat_table = peak_cat_table[
                                     peak_cat_table["DupFlag"] == 1
                                 ]
-                                # print(cat_table)
-                                # exit()
+
                             else:
                                 # print('MORE THAN 1 ENTRY FOUND WITHIN 99% MATCH RADIUS FOR THIS OBJECT')
                                 # peak_cat_table.pprint(max_lines=-1, max_width=-1)
                                 peak_cat_table = peak_cat_table[
                                     peak_cat_table["_r"] == np.min(peak_cat_table["_r"])
                                 ]
-                                # exit()
 
                         # otherwise extract the useful information from the prefilled survey table
                         peak_cat_freqs = surveys_used.loc[
@@ -572,8 +572,6 @@ class SEDDataParser:
                                 peak_current_flux_col
                             ].data[0]
 
-                            # print('separation for {}'.format(surveys_used.loc[idx,'Name']))
-                            # print(cat_table['_r'].value[0])
 
                             # if C1813_new then skip unless marked as new measurement!
                             if (
@@ -587,8 +585,6 @@ class SEDDataParser:
                             # if actual error column
                             if peak_cat_flux_errs != "":
                                 peak_current_err_col = peak_cat_flux_errs[i]
-                                # print(cat[0])
-                                # print(peak_cat_table)
                                 peak_current_flux_err = peak_cat_table[
                                     peak_current_err_col
                                 ].data[0]
@@ -630,8 +626,6 @@ class SEDDataParser:
                                 ignore_index=True,
                                 axis=0,
                             )
-                            # print('after')
-                            # (peak_phot_table)
 
         # now add almacal if it exists!
         alma_fluxes = self.query_vizier(
