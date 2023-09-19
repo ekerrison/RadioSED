@@ -313,3 +313,7 @@ class RaiSEDModel:
             for x in self.priorkeys
         ]
         return self.fit_param_ranges
+
+    def get_params(self):
+        """Returns a list whose keys are the parameters of the model, and values are empty"""
+        return self.priorkeys
