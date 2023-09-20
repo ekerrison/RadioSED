@@ -22,6 +22,7 @@ class Fitter:
         output_dir="output",
         overwrite=False,
         use_nestcheck=False,
+        savestr_end="",
     ):
         """
         initialise default models to be fit
@@ -38,15 +39,17 @@ class Fitter:
         self.fit_max = upper_freq
         self.output_dir = output_dir
         self.use_nestcheck = use_nestcheck
+        self.savestr_end = savestr_end
         return
 
-    def update_data(self, data: pd.DataFrame, peak_data: pd.DataFrame, name: str):
+    def update_data(self, data: pd.DataFrame, peak_data: pd.DataFrame, name: str, savestr_end: str = ""):
         """
         Function to update the dataframe we are doing fitting on and also the source name
         """
         self.data = data
         self.peak_data = peak_data
         self.name = name
+        self.savestr_end = savestr_end
 
         # check that no flux values or uncertainties are NaNs!
         if self.data["Flux Density (Jy)"].isnull().values.any():
@@ -92,6 +95,7 @@ class Fitter:
                 george_model=george_model,
                 george_model_defaults=george_model_defaults,
                 use_nestcheck=self.use_nestcheck,
+                savestr_end=self.savestr_end,
             )
         else:
             fit = RaiSEDModel(
@@ -104,6 +108,7 @@ class Fitter:
                 plot_colour=plot_colour,
                 output_dir=self.output_dir,
                 use_nestcheck=self.use_nestcheck,
+                savestr_end=self.savestr_end,
             )
         fit.setup_sampler(
             prior=prior_obj,
