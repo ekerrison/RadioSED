@@ -145,7 +145,7 @@ class Fitter:
         2) Derives parameter estimates for the best fitting model
 
         It then returns the re-ordered result_array and the fit_params for the
-        best model
+        best model, as well as the log10 evidence of each model
         """
         # get the best model!
         result_array, log10Z_arr, bmd_array = helper.get_best_model(result_array)
@@ -206,7 +206,7 @@ class Fitter:
             peaked_spectrum = False
             fit_params = result_array[0].get_param_medians_errors()
 
-        return result_array, fit_params
+        return result_array, fit_params, log10Z_arr
 
 
 class TemplateInterval:
