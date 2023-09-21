@@ -166,8 +166,8 @@ class Fitter:
                 result_array[0],
                 SED_func=result_array[0].__SED_func__,
                 gp=result_array[0].gp,
-                freq_min=self.lower_freq,
-                freq_max=self.upper_freq,
+                freq_min=self.fit_min,
+                freq_max=self.fit_max,
                 min_obs_freq=self.min_obs_freq,
                 max_obs_freq=self.max_obs_freq,
             )
