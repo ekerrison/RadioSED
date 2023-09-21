@@ -709,6 +709,42 @@ def get_retrig_intervals(
         )
     )
 
+    #if we have no turning pts, asusme linear and just return the spectral index
+    if min_lower_idx == max_upper_idx and min_lower_idx == 0:
+        alphagrads = (
+            np.log10(flux_dist[:, 0])
+            - np.log10(flux_dist[:, -1])
+        ) / (
+            np.log10(freq_arr_broadcast[:, 0])
+            - np.log10(freq_arr_broadcast[:, -1])
+        )
+
+        # get the credible interval based on this
+        alpha_interval = get_credible_interval(alphagrads)
+        alpha_retrig_interval = [-1, 0, 0]
+        alpha_thick_interval = [-1, 0, 0]
+        alpha_thin_interval = alpha_interval
+        func_type = 'linear'
+        # write dict to result object
+        result.param_intervals["peak_freq_interval"] = [-1, 0, 0]
+        result.param_intervals["peak_flux_interval"] = [-1, 0, 0]
+        result.param_intervals["trough_freq_interval"] = [-1, 0, 0]
+        result.param_intervals["trough_flux_interval"] = [-1, 0, 0]
+        result.param_intervals["alpha_retrig_interval"] = [-1, 0, 0]
+        result.param_intervals["alpha_thick_interval"] = [-1, 0, 0]
+        result.param_intervals["alpha_thin_interval"] = alpha_interval
+
+        return (
+            peak_freq_interval,
+            peak_flux_interval,
+            trough_freq_interval,
+            trough_flux_interval,
+            alpha_retrig_interval,
+            alpha_thick_interval,
+            alpha_thin_interval,
+            func_type,
+        )
+
     # print(trough_freq_interval[0], trough_freq_interval[0]*(1-distance_factor), freq_arr)
 
     # peak above trough
