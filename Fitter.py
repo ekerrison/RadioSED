@@ -174,7 +174,7 @@ class Fitter:
 
             fit_params = []
             for params in best_model_info:
-                temp = template_interval()
+                temp = TemplateInterval()
                 temp.median, temp.minus, temp.plus = params[0], params[1], params[2]
                 fit_params.extend([temp])
 
@@ -193,7 +193,7 @@ class Fitter:
 
             fit_params = []
             for params in best_model_info:
-                temp = template_interval()
+                temp = TemplateInterval()
                 temp.median, temp.minus, temp.plus = params[0], params[1], params[2]
                 fit_params.extend([temp])
 
