@@ -45,7 +45,7 @@ package requirements can be found in `requirements.txt` (for pip-compatible form
 If you are running anaconda or miniconda, once you clone this repo you can run `conda env create -n radiosed -f environment.yml` from within the folder to create a new environment
 with all the packages required to run RadioSED.
 
-You will also need to have [Git Large File Storage](https://git-lfs.com/) installed in order to download the requisite files (you may need to do another `git pull` after installing the LFS
+You will also need to have [Git Large File Storage](https://git-lfs.com/) installed in order to download the requisite files (you may need to do another `git pull` or `git lfs fetch` after installing the LFS
 in order to pull these files across). The necessary files are located within the `data\` subdirectory.
 
 If you would like to make use of the pre-determined crossmatches that come with RadioSED, you will need to initialise the DataParser with option `use_local=True`.
