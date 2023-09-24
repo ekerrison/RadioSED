@@ -453,6 +453,10 @@ class Plotter:
         return
 
     def plot_best_model(self, throw_figure=False):
+        """Function to plot the best fitting model as determined by the Bayes factor
+        (Bayesian Evidence). This plots both the best fitting realisation, as well as 
+        several addtional realisations from the posterior. Text is added to provide
+        useful information about the model, such as the parameter estimates."""
         fig, ax, main_pts = self.plot_model_range(throw_figure=True, model_idx=0)
 
         if throw_figure:
@@ -529,7 +533,8 @@ class Plotter:
         return
 
     def plot_epoch(self):
-        """Function to plot pooints coloured by epoch"""
+        """Function to plot pooints coloured by epoch, based on the date captured
+        as part of the Bibcode for each survey."""
 
         fig, ax, main_pts = self.plot_best_model(throw_figure=True)
 
@@ -566,7 +571,8 @@ class Plotter:
         return
 
     def plot_survey(self):
-        """Function to plot points coloured by survey"""
+        """Function to plot points coloured by survey, using the survey names within
+        the 'Survey quicknames' column of the flux data table."""
 
         fig, ax, main_pts = self.plot_best_model(throw_figure=True)
 
@@ -633,6 +639,8 @@ class Plotter:
         return
 
     def plot_publication(self):
+        """Functionally the same as plot_best_model but without any text on the 
+        plot except for the source name, and with ticks inside axis boundaries."""
         # plot array of best fitting functions
 
         fig, ax, main_pts = self.plot_best_model(throw_figure=True)
@@ -745,6 +753,14 @@ class Plotter:
         return
 
     def plot_all(self):
+        """Essentially a wrapper function that calls all of the other plotting
+        functions in this class including:
+        plot_all_models()
+        plot_best_model()
+        plot_epoch()
+        plot_survey()
+        plot_publication()
+        plot_outofbounds()"""
         self.plot_all_models()
         self.plot_best_model()
         self.plot_epoch()
