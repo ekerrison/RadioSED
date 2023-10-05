@@ -669,8 +669,8 @@ class SEDDataParser:
         #and any negative fluxes (sometimes the GLEAM forced photometry returns these in 
         #some bands)
         #now remove any entries that do not have a flux density
-        photometry_table = photometry_table[photometry_table['Frequency (Hz)'] > 0]
-        peak_phot_table = peak_phot_table[peak_phot_table['Frequency (Hz)'] > 0]
+        photometry_table = photometry_table[photometry_table['Flux Density (Jy)'] > 0]
+        peak_phot_table = peak_phot_table[peak_phot_table['Flux Density (Jy)'] > 0]
 
         return photometry_table, peak_phot_table
 
