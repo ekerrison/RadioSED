@@ -666,6 +666,11 @@ class SEDDataParser:
         photometry_table = photometry_table[~pd.isnull(photometry_table['Frequency (Hz)'])]
         peak_phot_table = peak_phot_table[~pd.isnull(peak_phot_table['Frequency (Hz)'])]
 
+        #and any negative fluxes (sometimes the GLEAM forced photometry returns these in 
+        #some bands)
+        #now remove any entries that do not have a flux density
+        photometry_table = photometry_table[photometry_table['Frequency (Hz)'] > 0]
+        peak_phot_table = peak_phot_table[peak_phot_table['Frequency (Hz)'] > 0]
 
         return photometry_table, peak_phot_table
 
