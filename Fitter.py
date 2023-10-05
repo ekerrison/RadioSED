@@ -154,7 +154,6 @@ class Fitter:
 
         if (
             "retrig" in result_array[0].model_type
-            or "orienti" in result_array[0].model_type
         ):
             peaked_spectrum = True
 
