@@ -117,7 +117,7 @@ class Plotter:
         fig, ax = plt.subplots(figsize=(7, 5))
         # plot very best model of each kind
         ax.set_xlabel("Frequency (MHz)")
-        ax.set_ylabel("Flux (Jy)")
+        ax.set_ylabel("Flux Density (Jy)")
         ax.set_yscale("log")
         ax.set_xscale("log")
         # plt.grid(True)
