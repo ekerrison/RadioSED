@@ -44,13 +44,13 @@ priors = SEDPriors()
 parser = SEDDataParser(use_local=False)
 
 # pick a source to fit - we want the closest RACS source to this one
-src_iau_name_auto, ra, dec, separation, racs_id = resolve_name_generic('J215924-241752')
+src_iau_name_auto, ra, dec, separation, racs_id = resolve_name_generic('J135753+004633')
 
 # or we know it's RACS ID
 src_racs_name = "RACS_2323-50A_5299"
 
 # get the iau name for this source in the RACS LOW catalogue
-src_iau_name = racs_id_to_name(src_racs_name)
+#src_iau_name = racs_id_to_name(src_racs_name)
 
 #check they are the same in this case
 print('names match: {}'.format(src_iau_name_auto == src_iau_name))
@@ -60,14 +60,14 @@ src_ra, src_dec = resolve_name_racs(src_iau_name)
 
 # get all of the various flux density measurements associated with this source
 flux_data, peak_flux_data = parser.retrieve_fluxdata_remote(
-    iau_name=src_iau_name, racs_id=racs_id, ra=ra, dec=dec
+    iau_name=src_iau_name_auto, racs_id=racs_id, ra=ra, dec=dec
 )
 
 #the same but using the local crossmatches
 # flux_data, peak_flux_data, alma_variable = parser.retrieve_fluxdata_local(iau_name = src_iau_name, racs_id = src_racs_name)
 
 # now initialise fitter
-fitter.update_data(data=flux_data, peak_data=peak_flux_data, name=src_racs_name)
+fitter.update_data(data=flux_data, peak_data=peak_flux_data, name=src_iau_name_auto)
 
 # setup models depending on whether or not we require a GP (required if we have GLEAM data)
 if "GLEAM" in flux_data["Survey quickname"].tolist():
@@ -78,7 +78,7 @@ else:
         model_list = pickle.load(f)
 
 # tell me what models we are running!
-print("running RaiSED for {} using models:".format(src_racs_name))
+print("running RaiSED for {} using models:".format(src_iau_name_auto))
 for model in model_list:
     print(model["model_type"])
 
@@ -90,11 +90,11 @@ for model in model_list:
 
 # do the fitting
 result_array = fitter.run_all_models(model_list)
-result_array, fit_params = fitter.analyse_fits(result_array)
+result_array, fit_params, log10Z_arr = fitter.analyse_fits(result_array)
 
 # now get some plots!
 plotter.update_data(
-    data=flux_data, peak_data=peak_flux_data, name=src_racs_name, savestr_end=""
+    data=flux_data, peak_data=peak_flux_data, name=src_iau_name_auto, savestr_end=""
 )
 plotter.update_results(result_array)
 plotter.plot_all_models()
