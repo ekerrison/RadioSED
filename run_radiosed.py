@@ -14,8 +14,8 @@ rc("font", **{"family": "serif", "size": 16})  # STIXGeneral
 import matplotlib.ticker as mticker
 
 # my modules
-from RaiSEDModel import RaiSEDModel
-from RaiSEDGPModel import RaiSEDGPModel
+from RadioSEDModel import RadioSEDModel
+from RadioSEDGPModel import RadioSEDGPModel
 from SEDPriors import SEDPriors
 from Plotter import Plotter
 from Fitter import Fitter
@@ -53,10 +53,10 @@ src_racs_name = "RACS_2323-50A_5299"
 #src_iau_name = racs_id_to_name(src_racs_name)
 
 #check they are the same in this case
-print('names match: {}'.format(src_iau_name_auto == src_iau_name))
+print('names match: {}'.format(src_iau_name_auto == src_iau_name_auto))
 
 # get its position
-src_ra, src_dec = resolve_name_racs(src_iau_name)
+src_ra, src_dec = resolve_name_racs(src_iau_name_auto)
 
 # get all of the various flux density measurements associated with this source
 flux_data, peak_flux_data = parser.retrieve_fluxdata_remote(

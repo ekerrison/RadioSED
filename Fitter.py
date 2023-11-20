@@ -1,8 +1,8 @@
 import bilby
 import numpy as np
 import pandas as pd
-from RaiSEDModel import RaiSEDModel
-from RaiSEDGPModel import RaiSEDGPModel
+from RadioSEDModel import RadioSEDModel
+from RadioSEDGPModel import RadioSEDGPModel
 import helper_functions as helper
 
 
@@ -83,7 +83,7 @@ class Fitter:
         """
 
         if has_GLEAM:
-            fit = RaiSEDGPModel(
+            fit = RadioSEDGPModel(
                 data=self.data,
                 model_type=model_type,
                 fit_min=self.fit_min,
@@ -98,7 +98,7 @@ class Fitter:
                 savestr_end=self.savestr_end,
             )
         else:
-            fit = RaiSEDModel(
+            fit = RadioSEDModel(
                 data=self.data,
                 model_type=model_type,
                 fit_min=self.fit_min,

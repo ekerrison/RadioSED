@@ -9,7 +9,7 @@ from inspect import signature
 import bilby
 import george
 from scipy.linalg import cholesky, cho_solve
-from RaiSEDModel import RaiSEDModel
+from RadioSEDModel import RadioSEDModel
 from helper_functions import get_credible_interval, get_retrig_intervals
 
 ####################################################################################################################
@@ -23,7 +23,7 @@ from helper_functions import get_credible_interval, get_retrig_intervals
 ####################################################################################################################
 
 
-class RaiSEDGPModel(RaiSEDModel):
+class RadioSEDGPModel(RadioSEDModel):
     """
     Generic Gaussian Process modelling class for my SED code
     """

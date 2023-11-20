@@ -136,6 +136,7 @@ class SEDPriors:
         # prior for a (peak freq) - from ~50MHz to 500 GHz (50-500e3) so we want LogUniform
         self.snellen_prior_dict[prefix + "a"] = bilby.prior.LogUniform(
             minimum=50, maximum=50e3
+            #minimum=50, maximum =1e3
         )
 
         # prior for b (peak flux) - from ~50mJy to 10Jy (50e-3 - 10) so LogUniform again

@@ -20,7 +20,7 @@ from helper_functions import get_credible_interval, get_retrig_intervals
 ####################################################################################################################
 
 
-class RaiSEDModel:
+class RadioSEDModel:
     """
     Generic modelling class for my SED code
     """
