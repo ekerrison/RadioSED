@@ -682,6 +682,7 @@ class SEDDataParser:
         we just check to see if there is variability at the 10 sigma level
         over multiple epochs of ALMA observations in small bands"""
         if almacal_data.shape[0] > 0:
+            #round so that it we are looking in bins of 5GHz
             almacal_data["Freq_rounded"] = almacal_data["Freq"].apply(
                 lambda x: 5 * round(x / 5)
             )
