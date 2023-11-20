@@ -35,6 +35,10 @@ class Plotter:
 
     def update_results(self, result_array):
         self.result_array = result_array
+        #update models
+        if self.result_array is not None:
+            self.plot_curves = [self.result_array[0].get_best_fit_func()]
+
         return
 
     def update_data(
@@ -468,6 +472,9 @@ class Plotter:
         len_str_toplot_list = len(str_toplot_list)
 
         # add main labels to plot
+        ax.xaxis.set_major_formatter(mticker.ScalarFormatter())
+        ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
+
         if len_str_toplot_list >= 4:
             main_label_x = 0.7
         else:
