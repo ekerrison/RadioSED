@@ -166,6 +166,19 @@ class Plotter:
 
         return fig, ax, main_pts
 
+    def plot_raw_sed(self):
+        """Function to plot SED data without any fitted models."""
+        fig, ax, xx = self.init_plot()
+        fig, ax, main_pts = self.add_data(fig, ax)
+        plt.savefig(
+            self.plotpath
+            + "_".join(self.name.split(" "))
+            + "{}_raw.png".format(self.savestr_end),
+            bbox_inches="tight",
+        )
+        plt.close()
+        return 
+
     def plot_all_models(self):
         """Function showing the best fitting realisation of each model we fit"""
 
