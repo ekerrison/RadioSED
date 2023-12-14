@@ -658,10 +658,13 @@ class Plotter:
         plt.close()
         return
 
-    def plot_publication(self):
+    def plot_publication(self, name = None):
         """Functionally the same as plot_best_model but without any text on the 
         plot except for the source name, and with ticks inside axis boundaries."""
         # plot array of best fitting functions
+
+        if name is None:
+            name = self.name
 
         fig, ax, main_pts = self.plot_best_model(throw_figure=True)
         # put tick params inside
@@ -676,7 +679,7 @@ class Plotter:
         ax.text(
             0.7,
             0.92,
-            self.name,
+            name,
             horizontalalignment="center",
             verticalalignment="center",
             transform=ax.transAxes,
@@ -684,7 +687,7 @@ class Plotter:
 
         plt.savefig(
             self.plotpath
-            + "_".join(self.name.split(" "))
+            + "_".join(name.split(" "))
             + "_bestfit{}_pub.pdf".format(self.savestr_end),
             bbox_inches="tight",
         )
