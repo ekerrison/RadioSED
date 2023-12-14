@@ -18,7 +18,8 @@ at20g_vizier = "J/MNRAS/434/956/table2"
 # function to check compactness in GLEAM source
 def check_gleam_compactness(ra, dec, gleam_viz=gleam_vizier, radius=25):
     """
-    Function that checks how compact a source is in GLEAM
+    Function that checks how compact a source is in GLEAM. Returns the peak/integratd
+    flux ratio of the nearest GLEAM source, and the radial distance to that source.
     """
 
     # now find nearest racs source
@@ -30,7 +31,7 @@ def check_gleam_compactness(ra, dec, gleam_viz=gleam_vizier, radius=25):
             coords, radius=radius * u.arcsec, catalog=gleam_vizier
         )[0].to_pandas()
     except IndexError:
-        return -1, -1, -1
+        return -1, -1
     print(res.columns)
 
     # make positions into coord objects
@@ -52,7 +53,7 @@ def check_at20g_compactness(ra, dec, at20g_viz=at20g_vizier, radius=19):
     Function that checks how compact a source is in Rajan's visibility catalogues for
     AT20G at 20GHz
 
-    return:
+    returns:
      - boolean for is_compact
      - visibility ratio
      - separation (arcseconds)
@@ -87,7 +88,8 @@ def check_at20g_compactness(ra, dec, at20g_viz=at20g_vizier, radius=19):
 # function to check compactness in RACS
 def check_racs_compactness(racs_iau_name: str, racs_viz=racs_vizier):
     """
-    Function that checks how compact a source is in racs
+    Function that checks how compact a source is in racs. Returns the number of 
+    gaussian components it is divided into, as well as the peak/integrated flux ratio.
     """
     racs_iau_name = racs_iau_name.strip("RACS-DR1 ")
     res = Vizier.query_object(racs_iau_name, catalog=racs_viz)[0].to_pandas()
