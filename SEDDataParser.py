@@ -192,30 +192,32 @@ class SEDDataParser:
 
         # if alma has multiple fluxes at the same frequency (to the nearest 5ghz) that vary by more than 10 sigma, flag
         # this source as variable, and don't include fluxes in fitting
-        alma_variable = self.is_alma_variable(almacal_pts)
-        if not alma_variable:
-            # add almacal to flux_data
-            alma_count = 0
-            for alma_idx in almacal_pts.index.tolist():
-                flux_data.loc[
-                    append_flux_idx + 1 + alma_count, "Frequency (Hz)"
-                ] = (almacal_pts.loc[alma_idx, "Freq"] * 1e9)
-                flux_data.loc[
-                    append_flux_idx + 1 + alma_count, "Flux Density (Jy)"
-                ] = almacal_pts.loc[alma_idx, "Flux"]
-                flux_data.loc[
-                    append_flux_idx + 1 + alma_count, "Survey quickname"
-                ] = "ALMACAL"
-                flux_data.loc[
-                    append_flux_idx + 1 + alma_count, "Uncertainty"
-                ] = almacal_pts.loc[alma_idx, "e_Flux"]
-                flux_data.loc[
-                    append_flux_idx + 1 + alma_count, "Survey quickname"
-                ] = "J/MNRAS/485/1188/acccat"
-                flux_data.loc[
-                    append_flux_idx + 1 + alma_count, "Refcode"
-                ] = "2019MNRAS.485.1188B"
-                alma_count += 1
+        alma_variable = -1
+        if almacal_pts.shape[0] > 0:
+            alma_variable = self.is_alma_variable(almacal_pts)
+            if not alma_variable:
+                # add almacal to flux_data
+                alma_count = 0
+                for alma_idx in almacal_pts.index.tolist():
+                    flux_data.loc[
+                        append_flux_idx + 1 + alma_count, "Frequency (Hz)"
+                    ] = (almacal_pts.loc[alma_idx, "Freq"] * 1e9)
+                    flux_data.loc[
+                        append_flux_idx + 1 + alma_count, "Flux Density (Jy)"
+                    ] = almacal_pts.loc[alma_idx, "Flux"]
+                    flux_data.loc[
+                        append_flux_idx + 1 + alma_count, "Survey quickname"
+                    ] = "ALMACAL"
+                    flux_data.loc[
+                        append_flux_idx + 1 + alma_count, "Uncertainty"
+                    ] = almacal_pts.loc[alma_idx, "e_Flux"]
+                    flux_data.loc[
+                        append_flux_idx + 1 + alma_count, "Survey quickname"
+                    ] = "J/MNRAS/485/1188/acccat"
+                    flux_data.loc[
+                        append_flux_idx + 1 + alma_count, "Refcode"
+                    ] = "2019MNRAS.485.1188B"
+                    alma_count += 1
 
         # resort by frequency
         flux_data = flux_data.sort_values(by="Frequency (Hz)")
@@ -443,7 +445,10 @@ class SEDDataParser:
                 # otherwise extract the useful information from the prefilled survey table
                 cat_freqs = surveys_used.loc[idx, "frequencies (MHz)"].split(";")
                 cat_fluxes = surveys_used.loc[idx, "flux_columns"].split(";")
-                cat_flux_errs = surveys_used.loc[idx, "e_flux_columns"].split(";")
+                try:
+                    cat_flux_errs = surveys_used.loc[idx, "e_flux_columns"].split(";")
+                except AttributeError:
+                    cat_flux_errs = ""
 
                 # loop through all the frequencies in this survey, and extract data from the query
                 for i in range(len(cat_fluxes)):
@@ -470,13 +475,14 @@ class SEDDataParser:
                         current_err_col = cat_flux_errs[i]
                         current_flux_err = cat_table[current_err_col].data[0]
                     else:
-                        current_flux_err = cat[9] * cat_table[current_flux_col].data[0]
+                        #assume 15% flux errors
+                        current_flux_err = 0.15 * cat_table[current_flux_col].data[0]
 
                     # if vlass, bump up err! - no longer needed as of version 2, but this is not currently on Vizier!
                     if surveys_used.loc[idx, "Name"] == "VLASS":
                         current_err_col = cat_flux_errs[i]
                         current_flux_err = (
-                            cat[9] * cat_table[current_flux_col].data[0]
+                            0.15 * cat_table[current_flux_col].data[0]
                             + cat_table[current_err_col].data[0]
                         )
 
@@ -626,11 +632,11 @@ class SEDDataParser:
                                 )
 
         # now add almacal if it exists!
-        print(alma_cat, ra, dec, alma_columns, alma_radius)
         alma_fluxes = self.query_vizier(
             cat=alma_cat, ra=ra, dec=dec, columns=alma_columns, radius=alma_radius
         )
         
+        alma_variable = -1
         if len(alma_fluxes) > 0:
             alma_fluxes = alma_fluxes[0].to_pandas()
             #check if variable
@@ -672,7 +678,7 @@ class SEDDataParser:
         photometry_table = photometry_table[photometry_table['Flux Density (Jy)'] > 0]
         peak_phot_table = peak_phot_table[peak_phot_table['Flux Density (Jy)'] > 0]
 
-        return photometry_table, peak_phot_table
+        return photometry_table, peak_phot_table, alma_variable
 
 
     def is_alma_variable(self, almacal_data: pd.DataFrame):
