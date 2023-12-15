@@ -24,22 +24,19 @@ def check_gleam_compactness(ra, dec, gleam_viz=gleam_vizier, radius=25):
 
     # now find nearest racs source
     coords = Coord.SkyCoord(ra=ra, dec=dec, unit=(u.deg, u.deg), frame="icrs")
-    res = Vizier.query_region(coords, radius=radius * u.arcsec, catalog=gleam_vizier)
-    print(res)
     try:
         res = Vizier.query_region(
             coords, radius=radius * u.arcsec, catalog=gleam_vizier
         )[0].to_pandas()
     except IndexError:
         return -1, -1
-    print(res.columns)
 
     # make positions into coord objects
     racs_coord = Coord.SkyCoord(ra=ra * u.deg, dec=dec * u.deg)
-    at20g_coord = Coord.SkyCoord(
+    gleam_coord = Coord.SkyCoord(
         ra=res["RAJ2000"], dec=res["DEJ2000"], unit=(u.hourangle, u.deg)
     )
-    separation = racs_coord.separation(at20g_coord).degree * 60 * 60
+    separation = racs_coord.separation(gleam_coord).degree * 60 * 60
 
     # get flux ratio
     fluxratio = res["Fpwide"] / res["Fintwide"]
@@ -97,6 +94,30 @@ def check_racs_compactness(racs_iau_name: str, racs_viz=racs_vizier):
     fluxratio = res["Fpk"].values[0] / res["Ftot"].values[0]
 
     return n_gaus, fluxratio
+
+def check_confusion(src_name, radius = 6.5*60, catalog=gleam_vizier):
+    """
+    Function that determines whether a source is likely suffer from confusion or blending.
+    Returns a boolean confusion_flag as well as the number of neighbours
+    """
+    src_name = src_name.replace("RACS-DR1", "")
+    src_name, ra, dec, separation, racs_id = resolve_name_generic(src_name)
+    
+    # now find nearest racs source
+    coords = Coord.SkyCoord(ra=ra, dec=dec, unit=(u.deg, u.deg), frame="icrs")
+    try:
+        res = Vizier.query_region(
+            coords, radius=radius * u.arcsec, catalog=gleam_vizier
+        )[0].to_pandas()
+    except IndexError:
+        return -1, -1
+
+    print(res)
+    num_neighbours = res.shape[0]
+    confusion_flag = False
+    if num_neighbours > 1:
+        confusion_flag = True
+    return confusion_flag, num_neighbours
 
 
 def resolve_name_generic(iau_name, racs_viz=racs_vizier):
@@ -178,13 +199,14 @@ if __name__ == "__main__":
     res = Vizier.query_object(test_name, catalog=racs_vizier)
     res = racs_id_to_name(test_name)
     print(res)
-    exit()
+    res = check_confusion(res)
+    print(res)
 
     racs_name, ra, dec, sep = resolve_name_generic(test_name)
     print(racs_name, ra, dec, sep)
     res = check_gleam_compactness(ra=ra, dec=dec)
     print(res)
-    exit()
+
     res = Coord.get_icrs_coordinates("RACS-DR1 J200826.5+001049")
     res = Vizier.query_region(
         "RACS-DR1 J200826.5+001049", radius=1 * u.arcmin, catalog=racs_vizier
