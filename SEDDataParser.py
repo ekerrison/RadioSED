@@ -303,8 +303,10 @@ class SEDDataParser:
     ):
         """
         Essentially a wrapper for astroquery's Vizier.query_region() function.
-        Output is a pandas table. Takes ra,dec coordinates as input
-        """
+        Output is a pandas table of (integrated) flux data, peak flux data 
+        (where this is provided in addition) and a flag for alma_variable sources.
+        Takes ra,dec coordinates as input
+        """ 
 
         photometry_table = pd.DataFrame(
             columns=[

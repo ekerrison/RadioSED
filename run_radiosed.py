@@ -59,7 +59,7 @@ print('names match: {}'.format(src_iau_name_auto == src_iau_name_auto))
 src_ra, src_dec = resolve_name_racs(src_iau_name_auto)
 
 # get all of the various flux density measurements associated with this source
-flux_data, peak_flux_data = parser.retrieve_fluxdata_remote(
+flux_data, peak_flux_data, alma_variable = parser.retrieve_fluxdata_remote(
     iau_name=src_iau_name_auto, racs_id=racs_id, ra=ra, dec=dec
 )
 
