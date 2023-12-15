@@ -172,8 +172,12 @@ class Fitter:
             )
 
             fit_params = []
-            for params in best_model_info:
+            fit_param_names = ['peak_freq', 'peak_flux', 'trough_freq', 'trough_flux',\
+                'alpha_retrig', 'alpha_thick', 'alpha_thin']
+            for param_idx in range(len(best_model_info[:-1])):
+                params = best_model_info[param_idx]
                 temp = TemplateInterval()
+                temp.name = fit_param_names[param_idx]
                 temp.median, temp.minus, temp.plus = params[0], params[1], params[2]
                 fit_params.extend([temp])
 
@@ -191,19 +195,41 @@ class Fitter:
             )
 
             fit_params = []
-            for params in best_model_info:
+            fit_param_names = ['peak_freq', 'peak_flux', 'alpha_thick', 'alpha_thin']
+            for param_idx in range(len(best_model_info[:-1])):
+                params = best_model_info[param_idx]
                 temp = TemplateInterval()
+                temp.name = fit_param_names[param_idx]
                 temp.median, temp.minus, temp.plus = params[0], params[1], params[2]
                 fit_params.extend([temp])
 
         elif "snellen" in result_array[0].model_type:
             peaked_spectrum = True
 
-            fit_params = result_array[0].get_param_medians_errors()
+            fit_params_bilby = result_array[0].get_param_medians_errors()
+
+            fit_params = []
+            fit_param_names = ['peak_freq', 'peak_flux', 'alpha_thick', 'alpha_thin', 'Const', 'M00']
+            for param_idx in range(len(fit_params_bilby)):
+                params = fit_params_bilby[param_idx]
+                temp = TemplateInterval()
+                temp.name = fit_param_names[param_idx]
+                temp.median, temp.minus, temp.plus = params.median, params.plus, params.minus
+                fit_params.extend([temp])
 
         elif "lin" in result_array[0].model_type:
             peaked_spectrum = False
-            fit_params = result_array[0].get_param_medians_errors()
+            
+            fit_params_bilby = result_array[0].get_param_medians_errors()
+
+            fit_params = []
+            fit_param_names = ['S_norm', 'alpha', 'Const', 'M00']
+            for param_idx in range(len(fit_params_bilby)):
+                params = fit_params_bilby[param_idx]
+                temp = TemplateInterval()
+                temp.name = fit_param_names[param_idx]
+                temp.median, temp.minus, temp.plus = params.median, params.plus, params.minus
+                fit_params.extend([temp])
 
         return result_array, fit_params, log10Z_arr
 
@@ -213,3 +239,7 @@ class TemplateInterval:
         self.median = None
         self.plus = None
         self.minus = None
+        self.name = None
+
+    def __str__(self):
+        return "{}: {} +/- {} / {}".format(self.name, self.median, self.plus, self.minus)
