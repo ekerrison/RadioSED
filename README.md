@@ -34,7 +34,7 @@ surveys, or you can feed in your own, custom dataset. If you choose to feed in y
 - Survey quickname
 - Refcode
 
-Where the 'survey quickname' is some easily identifiable name (e.g. RACS) and the Refcode is the bibcode for the relevant survey paper.
+Where the 'survey quickname' is some easily identifiable name (e.g. RACS) and the Refcode is the bibcode for the relevant survey paper. The Refcode should begin with the year of publication as an integer (e.g. 2017MNRAS.464.1146H) to allow RadioSED to parse it for the survey epoch (used in plotting).
 
 More documentation coming soon!
 
