@@ -92,6 +92,12 @@ for model in model_list:
 result_array = fitter.run_all_models(model_list)
 result_array, fit_params, log10Z_arr = fitter.analyse_fits(result_array)
 
+#print out the parameters given by fitting two different ways
+print('Best fit model type: ', result_array[0].model_type)
+print('Number of parameters in best fit: ', len(fit_params))
+print(fit_params[0])
+print(fit_params[0].name, fit_params[0].median, fit_params[0].plus, fit_params[0].minus)
+
 # now get some plots!
 plotter.update_data(
     data=flux_data, peak_data=peak_flux_data, name=src_iau_name_auto, savestr_end=""
