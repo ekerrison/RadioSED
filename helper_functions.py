@@ -700,6 +700,11 @@ def get_retrig_intervals(
     # if max_upper_idx == len(freq_arr) - 1:
     #     max_upper_idx = len(freq_arr) - 2
 
+    #if max_lower = min_upper shift them apart a bit
+    if max_lower_idx == min_upper_idx:
+        max_lower_idx -= 3
+        min_upper_idx += 3
+
     print(
         "calculating indices at: {:.2f}, {:.2f}, {:.2f}, {:.2f} MHz".format(
             freq_arr[max_lower_idx],
@@ -710,7 +715,7 @@ def get_retrig_intervals(
     )
 
     #if we have no turning pts, asusme linear and just return the spectral index
-    if min_lower_idx == max_upper_idx and min_lower_idx == 0:
+    if (min_lower_idx == max_upper_idx and min_lower_idx == 0) or (max_lower_idx == min_lower_idx and max_upper_idx == min_upper_idx):
         alphagrads = (
             np.log10(flux_dist[:, 0])
             - np.log10(flux_dist[:, -1])
