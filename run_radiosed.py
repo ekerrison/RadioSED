@@ -21,7 +21,7 @@ from Plotter import Plotter
 from Fitter import Fitter
 from SEDDataParser import SEDDataParser
 from helper_functions import *
-from auxiliary_info_functions import *
+from auxiliary_info_functions import AuxInfo
 
 #make necessary directories if they do not exist
 print('output directory exists: ', os.path.isdir(os.path.join(os.getcwd(), 'output')))
@@ -35,6 +35,7 @@ if not os.path.isdir(os.path.join(os.getcwd(), 'output')):
 fitter = Fitter(overwrite=False, use_nestcheck=False)
 plotter = Plotter(plotpath="output/model_plots/")
 priors = SEDPriors()
+info = AuxInfo()
 
 # set use_local=True if you want to use the crossmatches that come pre-matched with RadioSED
 # this is the recommended setting for if you want to fit many sources (>20 or so) as it removes
@@ -44,7 +45,7 @@ priors = SEDPriors()
 parser = SEDDataParser(use_local=False)
 
 # pick a source to fit - we want the closest RACS source to this one
-src_iau_name_auto, ra, dec, separation, racs_id = resolve_name_generic('J135753+004633')
+src_iau_name_auto, ra, dec, separation, racs_id = info.resolve_name_generic('J135753+004633')
 
 # or we know it's RACS ID
 src_racs_name = "RACS_2323-50A_5299"
@@ -56,7 +57,13 @@ src_racs_name = "RACS_2323-50A_5299"
 print('names match: {}'.format(src_iau_name_auto == src_iau_name_auto))
 
 # get its position
-src_ra, src_dec = resolve_name_racs(src_iau_name_auto)
+src_ra, src_dec = info.resolve_name_racs(src_iau_name_auto)
+
+# get auxiliary info about the source compactness and possible blending
+gleam_blending_flag = info.check_confusion(src_name = src_iau_name_auto)
+gleam_fluxratio, gleam_sep = info.check_gleam_compactness(src_name = src_iau_name_auto)
+racs_n_gaus, racs_fluxratio = info.check_racs_compactness(src_name = src_iau_name_auto) 
+at20g_compactness, at20g_visibility, at20g_sep = info.check_at20g_compactness(src_name = src_iau_name_auto)
 
 # get all of the various flux density measurements associated with this source
 flux_data, peak_flux_data, alma_variable = parser.retrieve_fluxdata_remote(
