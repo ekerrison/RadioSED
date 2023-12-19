@@ -151,12 +151,12 @@ class SEDDataParser:
         # now make into a flux table!
         flux_data = pd.DataFrame(
             {
-                "Frequency (Hz)": datarow["survey_freqs"].squeeze(),
-                "Flux Density (Jy)": datarow["survey_fluxes"].squeeze(),
-                "Uncertainty": datarow["survey_flux_errs"].squeeze(),
-                "Survey quickname": datarow["survey_vizier"].squeeze(),
-                "Refcode": datarow["survey_bibcodes"].squeeze(),
-                "Survey quickname": datarow["survey_names"].squeeze(),
+                "Frequency (Hz)": datarow["survey_freqs"],
+                "Flux Density (Jy)": datarow["survey_fluxes"],
+                "Uncertainty": datarow["survey_flux_errs"]),
+                "Survey quickname": datarow["survey_vizier"],
+                "Refcode": datarow["survey_bibcodes"],
+                "Survey quickname": datarow["survey_names"],
             }
         )
 
@@ -176,10 +176,10 @@ class SEDDataParser:
         append_flux_idx = flux_data.shape[0]
         flux_data.loc[append_flux_idx, "Frequency (Hz)"] = 888000000
         flux_data.loc[append_flux_idx, "Flux Density (Jy)"] = (
-            datarow["total_flux_source"].values[0] / 1e3
+            datarow["total_flux_source"] / 1e3
         )
         flux_data.loc[append_flux_idx, "Uncertainty"] = (
-            datarow["e_total_flux_source"].values[0] / 1e3
+            datarow["e_total_flux_source"] / 1e3
         )
         flux_data.loc[append_flux_idx, "Survey quickname"] = ""
         flux_data.loc[append_flux_idx, "Refcode"] = "2021PASA...38...58H"
