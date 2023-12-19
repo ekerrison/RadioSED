@@ -153,7 +153,7 @@ class SEDDataParser:
             {
                 "Frequency (Hz)": datarow["survey_freqs"],
                 "Flux Density (Jy)": datarow["survey_fluxes"],
-                "Uncertainty": datarow["survey_flux_errs"]),
+                "Uncertainty": datarow["survey_flux_errs"],
                 "Survey quickname": datarow["survey_vizier"],
                 "Refcode": datarow["survey_bibcodes"],
                 "Survey quickname": datarow["survey_names"],
