@@ -213,7 +213,7 @@ class AuxInfo:
         name (RACS-DR1 Jxxxxxx+xxxxxx)
         """
 
-        res = Vizier.query_constraints(catalog=racs_vizier, ID="={}".format(racs_id))[
+        res = Vizier.query_constraints(catalog=self.racs_vizier, ID="={}".format(racs_id))[
             0
         ].to_pandas()
         racs_iau_name = res["RACS-DR1"].values[0]
