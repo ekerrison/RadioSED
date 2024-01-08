@@ -404,6 +404,7 @@ def get_credible_interval(array, interval=np.nan, lower_quant=0.16, upper_quant=
     # now get the quantiles!
     quants_to_compute = np.array([lower_quant, 0.5, upper_quant])
     quants = np.percentile(array, quants_to_compute * 100)
+    print('quants: ', quants)
     median = quants[1]
     plus = quants[2] - median
     minus = median - quants[0]
@@ -583,6 +584,60 @@ def get_retrig_intervals(
         alpha_result,
     )
     flux_dist = flux_dist.transpose()
+
+    #mask out things below 10-5 because we run into jumps due to the machine
+    #floor down here
+    if flux_dist[flux_dist < 10e-5].shape[0] > 0:
+        unique_keys, indices = np.unique(np.argwhere(flux_dist < 10e-5)[:,0], return_index=True)
+
+        freq_max_new = freq_arr[np.min(np.argwhere(flux_dist < 20e-5)[indices, 1])]
+        freq_max_new = 1e6*freq_max_new
+
+        freq_arr = 10 ** (
+            np.linspace(np.log10(freq_min / 1e6), np.log10(freq_max_new / 1e6), 1000)
+        )  # np.linspace(np.log10(70), np.log10(30e3)
+
+        # broadcast it for later use
+        freq_arr_broadcast = np.tile(freq_arr, (a_result.shape[0], 1))
+
+        # get the fluxes for each combination of parameters in the posterior
+        flux_dist = SED_func(
+            freq_arr.reshape(-1, 1),
+            a_result,
+            b_result,
+            c_result,
+            d_result,
+            s_norm_result,
+            alpha_result,
+        )
+        flux_dist = flux_dist.transpose()
+
+    #extra check to make sure this is really gone
+    freq_max_loop = freq_max
+    while flux_dist[flux_dist < 10e-5].shape[0] > 0:
+        print(flux_dist[flux_dist < 10e-5].shape[0])
+        # get physical param distributions! We are fitting in MHz!!
+        freq_max_loop *= 0.9
+        print(freq_max_loop)
+        freq_arr = 10 ** (
+            np.linspace(np.log10(freq_min / 1e6), np.log10(freq_max_loop / 1e6), 1000)
+        )  # np.linspace(np.log10(70), np.log10(30e3)
+
+        # broadcast it for later use
+        freq_arr_broadcast = np.tile(freq_arr, (a_result.shape[0], 1))
+
+        # get the fluxes for each combination of parameters in the posterior
+        flux_dist = SED_func(
+            freq_arr.reshape(-1, 1),
+            a_result,
+            b_result,
+            c_result,
+            d_result,
+            s_norm_result,
+            alpha_result,
+        )
+        flux_dist = flux_dist.transpose()
+
 
     # use np.diff to find turning pts
     diff_dist = np.diff(flux_dist, axis=1)
