@@ -111,14 +111,24 @@ class SEDDataParser:
 
         return
 
-    def retrieve_fluxdata_local(self, iau_name=None, racs_id=None):
-        # extract from masterlist
-        datarow = self.masterlist.loc[self.masterlist["source_id"] == racs_id, :]
+    def retrieve_fluxdata_local(self, iau_name=None, racs_id=None, idx=None):
+        if idx is not None:
+            # extract from masterlist
+            datarow = self.masterlist.loc[idx, :]
+            racs_id = datarow['source_id']
 
-        # same for peak data!
-        peak_datarow = self.peak_masterlist.loc[
-            self.peak_masterlist["source_id"] == racs_id, :
-        ]
+            # same for peak data!
+            peak_datarow = self.peak_masterlist.loc[
+                self.peak_masterlist["source_id"] == racs_id, :
+            ]
+        else:
+            # extract from masterlist
+            datarow = self.masterlist.loc[self.masterlist["source_id"] == racs_id, :]
+
+            # same for peak data!
+            peak_datarow = self.peak_masterlist.loc[
+                self.peak_masterlist["source_id"] == racs_id, :
+            ]
 
         # if more than one, just pick first one THIS WILL ONLY BE AN ISSUE IF IT IS A COMPLEX SOURCE!
         # and in that case it will be flagged anyway!
@@ -151,15 +161,15 @@ class SEDDataParser:
         # now make into a flux table!
         flux_data = pd.DataFrame(
             {
-                "Frequency (Hz)": datarow["survey_freqs"],
-                "Flux Density (Jy)": datarow["survey_fluxes"],
-                "Uncertainty": datarow["survey_flux_errs"],
-                "Survey quickname": datarow["survey_vizier"],
-                "Refcode": datarow["survey_bibcodes"],
-                "Survey quickname": datarow["survey_names"],
+                "Frequency (Hz)": datarow["survey_freqs"].squeeze(),
+                "Flux Density (Jy)": datarow["survey_fluxes"].squeeze(),
+                "Uncertainty": datarow["survey_flux_errs"].squeeze(),
+                "Survey quickname": datarow["survey_vizier"].squeeze(),
+                "Refcode": datarow["survey_bibcodes"].squeeze(),
+                "Survey quickname": datarow["survey_names"].squeeze(),
             }
         )
-
+        print(flux_data)
         # drop vlssr as it is peak flux!
         if "vlssr" in flux_data["Survey quickname"].apply(lambda x: x.lower()).tolist():
             # get index and drop because it's peak!
@@ -176,10 +186,10 @@ class SEDDataParser:
         append_flux_idx = flux_data.shape[0]
         flux_data.loc[append_flux_idx, "Frequency (Hz)"] = 888000000
         flux_data.loc[append_flux_idx, "Flux Density (Jy)"] = (
-            datarow["total_flux_source"] / 1e3
+            datarow["total_flux_source"].values[0] / 1e3
         )
         flux_data.loc[append_flux_idx, "Uncertainty"] = (
-            datarow["e_total_flux_source"] / 1e3
+            datarow["e_total_flux_source"].values[0] / 1e3
         )
         flux_data.loc[append_flux_idx, "Survey quickname"] = ""
         flux_data.loc[append_flux_idx, "Refcode"] = "2021PASA...38...58H"
@@ -277,7 +287,7 @@ class SEDDataParser:
             peak_flux_data["Refcode"] = "2021PASA...38...58H"
             peak_flux_data["Frequency (Hz)"] = 888 * 1e6
             peak_flux_data["Survey quickname"] = "RACS"
-        return flux_data, peak_flux_data, alma_variable
+        return flux_data, peak_flux_data, alma_variable, racs_id
 
     def query_vizier(self, cat, ra, dec, columns, radius):
         # radius to search (arcsec)
@@ -340,7 +350,7 @@ class SEDDataParser:
         count = 1
         # first,query object
         for idx in surveys_used.index.tolist():
-            radius = surveys_used.loc[idx, "match_radius_99"]
+            radius = surveys_used.loc[idx, "match_radius_95"]
 
             # SKIP IF ALMACAL
             if surveys_used.loc[idx, "Name"] == "ALMACAL":
