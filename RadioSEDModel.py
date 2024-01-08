@@ -181,6 +181,7 @@ class RadioSEDModel:
         # except:
         #    pass
         # return self.result
+        return
 
     def get_bic(self):
         """returns the Bayesian Information Criterion as defined by Schwarz (1978)"""
