@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 
 
-# bilby for mcmc fitting!
-import bilby
+# bilby for likelihoods
+from bilby import likelihood
 import george
 import inspect
 
@@ -1063,7 +1063,7 @@ def check_retrig_is_peaked(
     return
 
 
-class GaussianCovLikelihood(bilby.Analytical1DLikelihood):
+class GaussianCovLikelihood(likelihood.Analytical1DLikelihood):
     def __init__(self, x, y, function, sigma=None, a=None, tau=None):
         """
         A general Gaussian likelihood for known or unknown noise - the model
@@ -1112,7 +1112,7 @@ class GaussianCovLikelihood(bilby.Analytical1DLikelihood):
         # plus a constant we don't care about!
 
 #class for censored likelihood
-class GaussianCensoredLikelihood(bilby.GaussianLikelihood):
+class GaussianCensoredLikelihood(likelihood.GaussianLikelihood):
     def __init__(self, x, y, func, sigma=None, yUL=None, **kwargs):
         """
         A general Gaussian likelihood for known or unknown noise but with 
@@ -1138,7 +1138,7 @@ class GaussianCensoredLikelihood(bilby.GaussianLikelihood):
         """
 
         super(GaussianCensoredLikelihood, self).__init__(x=x, y=y, func=func, sigma=sigma, **kwargs)
-        self.yUL = yUL
+        self.yUL = np.array(yUL, dtype=bool)
 
     def log_likelihood(self):
         log_l_main = np.sum(- (self.residual[~self.yUL] / self.sigma[~self.yUL])**2 / 2 -
@@ -1151,6 +1151,102 @@ class GaussianCensoredLikelihood(bilby.GaussianLikelihood):
         return self.__class__.__name__ + '(x={}, y={}, func={}, sigma={})' \
             .format(self.x, self.y, self.func.__name__, self.sigma)
 
+'''
+#class for censored likelihood with GP
+class GaussianCensoredLikelihood(likelihood.GeorgeLikelihood):
+    def __init__(self, x, y, func, sigma=None, yUL=None, **kwargs):
+        """
+        A general Gaussian likelihood for known or unknown noise but with 
+        censored data - the model parameters are inferred from the arguments of function
+
+        Parameters
+        ==========
+        x, y: array_like
+            The data to analyse
+        yUL: array_like (boolean)
+            Flags for whether the data is left censored (upper limits).
+        func:
+            The python function to fit to the data. Note, this must take the
+            dependent variable as its first argument. The other arguments
+            will require a prior and will be sampled over (unless a fixed
+            value is given).
+        sigma: None, float, array_like
+            If None, the standard deviation of the noise is unknown and will be
+            estimated (note: this requires a prior to be given for sigma). If
+            not None, this defines the standard-deviation of the data points.
+            This can either be a single float, or an array with length equal
+            to that for `x` and `y`.
+        """
+
+        super(GaussianCensoredLikelihood, self).__init__(x=x, y=y, func=func, sigma=sigma, **kwargs)
+        self.yUL = np.array(yUL, dtype=bool)
+
+    def log_likelihood(self):
+        log_l_main = np.sum(- (self.residual[~self.yUL] / self.sigma[~self.yUL])**2 / 2 -
+                       np.log(2 * np.pi * self.sigma[~self.yUL]**2) / 2)
+        log_l_censored = np.sum(np.log(0.5 + 0.5*erf(self.residual[self.yUL]/(np.sqrt(2)*self.sigma[self.yUL]))))
+        log_l = log_l_main + log_l_censored
+        return log_l
+
+    def __repr__(self):
+        return self.__class__.__name__ + '(x={}, y={}, func={}, sigma={})' \
+            .format(self.x, self.y, self.func.__name__, self.sigma)
+'''
+
+class GeorgeCensoredLikelihood(likelihood.GeorgeLikelihood):
+
+    def __init__(self, kernel, mean_model, t, y, yerr=1e-6,  yUL=None):
+        """
+            Basic Gaussian Process likelihood interface for `george' with censored data
+
+            Parameters
+            ==========
+            kernel: george.kernels.Kernel
+                `celerite` or `george` kernel. See the respective package documentation about the usage.
+            mean_model: george.modeling.Model
+                Mean model
+            t: array_like
+                The `times` or `x` values of the data set.
+            y: array_like
+                The `y` values of the data set.
+            yerr: float, int, array_like, optional
+                The error values on the y-values. If a single value is given, it is assumed that the value
+                applies for all y-values. Default is 1e-6, effectively assuming that no y-errors are present.
+            yUL: array_like (boolean)
+                Flags for whether the data is left censored (upper limits).
+            
+            For this likelihood we assume the upper limits are not covariant with anything else, 
+            so that the likelihood is easily separable.
+        """
+        import george
+        self.yUL = np.array(yUL, dtype=bool)
+        self.tUL_data = t[self.yUL]
+        self.yUL_data = y[self.yUL]
+        self.yerrUL_data = yerr[self.yUL]
+        t = t[~self.yUL]
+        y = y[~self.yUL]
+        yerr = yerr[~self.yUL]
+        super().__init__(kernel=kernel, mean_model=mean_model, t=t, y=y, yerr=yerr)
+
+    def log_likelihood(self):
+        """
+        Calculate the log-likelihood for the Gaussian process given the current parameters.
+
+        Returns
+        =======
+        float: The log-likelihood value.
+        """
+        for name, value in self.parameters.items():
+            try:
+                self.gp.set_parameter(name=name, value=value)
+            except ValueError:
+                raise ValueError(f"Parameter {name} not a valid parameter for the GP.")
+        try:
+            log_l_censored = np.sum(np.log(0.5 + 0.5*erf((self.mean_model.get_value(self.tUL_data) - self.yUL_data)/(np.sqrt(2)*self.yerrUL_data))))
+            return self.gp.log_likelihood(self.y) + log_l_censored
+        except Exception:
+            return -np.inf
+
     
 
 # tests
@@ -1158,3 +1254,14 @@ if __name__ == "__main__":
     test_data = np.array([1, 2, 3, 4, 5])
     result = get_credible_interval(test_data, interval=0.68)
     print(result)
+    kernel = 0.2 * george.kernels.Matern32Kernel(5.0, block=(73, 230))
+    from SEDPriors import SEDPriors
+    priors = SEDPriors()
+    george_model = LinearModel
+    george_model_defaults = priors.linear_gp_defaults
+    print(LinearModel(*george_model_defaults).get_value(np.array([1,2,3])))
+    #exit()
+    test = GeorgeCensoredLikelihood(kernel = kernel, mean_model = george_model(*george_model_defaults), \
+    t = np.array([1,2,3,4]), y = np.array([1,2,3,4]), yerr = np.array([0.1]*4), yUL = [False,False,False,True])
+    val = test.log_likelihood()
+    print(val)
