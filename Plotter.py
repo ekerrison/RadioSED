@@ -52,6 +52,9 @@ class Plotter:
         self.peak_data = peak_data
         self.savestr_end = savestr_end
 
+        if "Upper limits" not in self.data.columns.tolist():
+                self.data["Upper limits"] = False
+
         # check that no flux values or uncertainties are NaNs!
         if self.data["Flux Density (Jy)"].isnull().values.any():
             raise ValueError(
@@ -154,9 +157,9 @@ class Plotter:
 
         # plotting integrated flux densities
         main_pts, main_caps, main_barlinecols = ax.errorbar(
-            self.plot_freqs,
-            self.plot_fluxes,
-            yerr=self.plot_errs,
+            self.plot_freqs[self.data["Upper limits"] == False],
+            self.plot_fluxes[self.data["Upper limits"] == False],
+            yerr=self.plot_errs[self.data["Upper limits"] == False],
             linewidth=1,
             fmt="o",
             color="k",
@@ -164,12 +167,29 @@ class Plotter:
             zorder=1000,
         )
 
-        return fig, ax, main_pts
+        #appending upper limits
+        if self.data[self.data['Upper limits'] == True].shape[0] > 0:
+            lim_pts, lim_caps, lim_barlinecols = ax.errorbar(
+                self.data.loc[self.data["Upper limits"] == True, 'Frequency (Hz)']/1e6,
+                self.data.loc[self.data["Upper limits"] == True, 'Flux Density (Jy)'],
+                yerr=self.data.loc[self.data["Upper limits"] == True, 'Flux Density (Jy)']*0.3,
+                linewidth=1,
+                fmt="o",
+                color="dimgrey",
+                markersize=2,
+                zorder=1000,
+                uplims=True,
+            )
+        else:
+             lim_pts = None
+        
+
+        return fig, ax, main_pts, lim_pts
 
     def plot_raw_sed(self):
         """Function to plot SED data without any fitted models."""
         fig, ax, xx = self.init_plot()
-        fig, ax, main_pts = self.add_data(fig, ax)
+        fig, ax, main_pts, lim_pts = self.add_data(fig, ax)
         plt.savefig(
             self.plotpath
             + "_".join(self.name.split(" "))
@@ -183,7 +203,7 @@ class Plotter:
         """Function showing the best fitting realisation of each model we fit"""
 
         fig, ax, xx = self.init_plot()
-        fig, ax, main_pts = self.add_data(fig, ax)
+        fig, ax, main_pts, lim_pts = self.add_data(fig, ax)
 
         self.plot_curves = []
         # plot all the functions!
@@ -374,7 +394,7 @@ class Plotter:
             temp1, temp2, xx = self.init_plot()
             plt.close(temp1)
 
-        fig, ax, main_pts = self.add_data(fig, ax)
+        fig, ax, main_pts, lim_pts = self.add_data(fig, ax)
 
         if self.plot_curves is None:
             self.plot_curves = [self.result_array[model_idx].get_best_fit_func()]

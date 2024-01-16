@@ -10,7 +10,7 @@ import bilby
 import george
 from scipy.linalg import cholesky, cho_solve
 from RadioSEDModel import RadioSEDModel
-from helper_functions import get_credible_interval, get_retrig_intervals
+from helper_functions import get_credible_interval, get_retrig_intervals, GeorgeCensoredLikelihood
 
 ####################################################################################################################
 #                                        Emily Kerrison (SIFA 2022)                                                #
@@ -43,17 +43,28 @@ class RadioSEDGPModel(RadioSEDModel):
         self.gp_kernel = 0.2 * george.kernels.Matern32Kernel(
             5.0, block=(73, 230)
         )  # add some other kernel to ensure smoothness around the block!+ george.kernels.ConstantKernel(log_constant = 0)
+        print(self.freq, self.flux, self.yUL)
         return
 
     # setting the likelihood to a bilby likelihood object using the appropriate SED function
     def set_likelihood(self):
-        self.likelihood = bilby.core.likelihood.GeorgeLikelihood(
-            kernel=self.gp_kernel,
-            mean_model=self.george_model(*self.george_model_defaults),
-            t=self.freq,
-            y=self.flux,
-            yerr=self.ferr,
-        )
+        if not self.censored:
+            self.likelihood = bilby.core.likelihood.GeorgeLikelihood(
+                kernel=self.gp_kernel,
+                mean_model=self.george_model(*self.george_model_defaults),
+                t=self.freq,
+                y=self.flux,
+                yerr=self.ferr,
+            )
+        else:
+            self.likelihood = GeorgeCensoredLikelihood(
+                kernel=self.gp_kernel,
+                mean_model=self.george_model(*self.george_model_defaults),
+                t=self.freq,
+                y=self.flux,
+                yerr=self.ferr,
+                yUL=self.yUL,
+            )
         return
 
     def setup_sampler(self, prior: bilby.core.prior.dict.PriorDict, **kwargs):

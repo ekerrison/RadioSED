@@ -7,7 +7,7 @@ from inspect import signature
 
 # bilby for mcmc fitting!
 import bilby
-from helper_functions import get_credible_interval, get_retrig_intervals
+from helper_functions import get_credible_interval, get_retrig_intervals, GaussianCensoredLikelihood
 
 ####################################################################################################################
 #                                        Emily Kerrison (SIFA 2022)                                                #
@@ -75,6 +75,13 @@ class RadioSEDModel:
         else:
             self.ferr = 1.0
 
+        #get whether we have censored data
+        self.censored = False
+        if "Upper limits" in data.columns.tolist():
+            if sum(data["Upper limits"]) > 0:
+                self.yUL = data["Upper limits"].to_numpy()[truth]
+                self.censored = True
+
         # set savestr end
         if self.new_flag:
             self.new_yr = new_yr
@@ -93,10 +100,14 @@ class RadioSEDModel:
 
     # setting the likelihood to a bilby likelihood object using the appropriate SED function
     def set_likelihood(self):
-        self.likelihood = bilby.likelihood.GaussianLikelihood(
-            x=self.freq, y=self.flux, func=self.__SED_func__, sigma=self.ferr
-        )
-        # self.likelihood = likelihood
+        if not self.censored:
+            self.likelihood = bilby.likelihood.GaussianLikelihood(
+                x=self.freq, y=self.flux, func=self.__SED_func__, sigma=self.ferr
+            )
+        else:
+            self.likelihood = GaussianCensoredLikelihood(
+                x=self.freq, y=self.flux, func=self.__SED_func__, yUL=self.yUL, sigma=self.ferr
+            )
         return
 
     # creating the sampler
