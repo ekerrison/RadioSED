@@ -1151,47 +1151,6 @@ class GaussianCensoredLikelihood(likelihood.GaussianLikelihood):
         return self.__class__.__name__ + '(x={}, y={}, func={}, sigma={})' \
             .format(self.x, self.y, self.func.__name__, self.sigma)
 
-'''
-#class for censored likelihood with GP
-class GaussianCensoredLikelihood(likelihood.GeorgeLikelihood):
-    def __init__(self, x, y, func, sigma=None, yUL=None, **kwargs):
-        """
-        A general Gaussian likelihood for known or unknown noise but with 
-        censored data - the model parameters are inferred from the arguments of function
-
-        Parameters
-        ==========
-        x, y: array_like
-            The data to analyse
-        yUL: array_like (boolean)
-            Flags for whether the data is left censored (upper limits).
-        func:
-            The python function to fit to the data. Note, this must take the
-            dependent variable as its first argument. The other arguments
-            will require a prior and will be sampled over (unless a fixed
-            value is given).
-        sigma: None, float, array_like
-            If None, the standard deviation of the noise is unknown and will be
-            estimated (note: this requires a prior to be given for sigma). If
-            not None, this defines the standard-deviation of the data points.
-            This can either be a single float, or an array with length equal
-            to that for `x` and `y`.
-        """
-
-        super(GaussianCensoredLikelihood, self).__init__(x=x, y=y, func=func, sigma=sigma, **kwargs)
-        self.yUL = np.array(yUL, dtype=bool)
-
-    def log_likelihood(self):
-        log_l_main = np.sum(- (self.residual[~self.yUL] / self.sigma[~self.yUL])**2 / 2 -
-                       np.log(2 * np.pi * self.sigma[~self.yUL]**2) / 2)
-        log_l_censored = np.sum(np.log(0.5 + 0.5*erf(self.residual[self.yUL]/(np.sqrt(2)*self.sigma[self.yUL]))))
-        log_l = log_l_main + log_l_censored
-        return log_l
-
-    def __repr__(self):
-        return self.__class__.__name__ + '(x={}, y={}, func={}, sigma={})' \
-            .format(self.x, self.y, self.func.__name__, self.sigma)
-'''
 
 class GeorgeCensoredLikelihood(likelihood.GeorgeLikelihood):
 

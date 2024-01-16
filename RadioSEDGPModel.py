@@ -43,7 +43,6 @@ class RadioSEDGPModel(RadioSEDModel):
         self.gp_kernel = 0.2 * george.kernels.Matern32Kernel(
             5.0, block=(73, 230)
         )  # add some other kernel to ensure smoothness around the block!+ george.kernels.ConstantKernel(log_constant = 0)
-        print(self.freq, self.flux, self.yUL)
         return
 
     # setting the likelihood to a bilby likelihood object using the appropriate SED function
