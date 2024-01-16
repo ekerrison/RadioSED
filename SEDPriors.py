@@ -62,7 +62,7 @@ class SEDPriors:
 
         self.linear_prior_dict = bilby.core.prior.PriorDict()
 
-        # prior for C some scale factor no idea so log uniform between 0.001 and 1e4 = 1,000.
+        # prior for C some scale factor so log uniform between 0.001 and 1e4 = 1,000.
         self.linear_prior_dict[prefix + "C"] = bilby.prior.LogUniform(
             minimum=1e-4, maximum=1e4
         )
@@ -103,11 +103,9 @@ class SEDPriors:
         # we don't know anythign about b - so make it uniform? It must be positive
         self.orienti_prior_dict[prefix + "b"] = bilby.prior.Uniform(1, 50, "b")
 
-        # truncated gaussian for curvature parameter 'c', because we are only interested
-        # in fits with a negative curvature!!
-        self.orienti_prior_dict[prefix + "c"] = bilby.prior.TruncatedGaussian(
-            mu=-1, sigma=5, name="c", maximum=0, minimum=-1e12
-        )  # -10, 1
+        # for curvature parameter 'c' we are only interested
+        # in fits with a negative curvature
+        self.orienti_prior_dict[prefix + "c"] = bilby.prior.LogUniform(minimum=-1e-5, maximum=0)
 
         return self.orienti_prior_dict
 
