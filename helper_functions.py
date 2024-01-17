@@ -487,12 +487,12 @@ def get_orienti_intervals(
 
     # now get the alpha_thick and alpha_thin indices away from the peak!
     # taking index at last observed point, following an old snellen paper (FIND REFERENCE!) where they did this
-    alpha_thick_grads = 2 * c_result * flux_dist[:, min_obs_idx] + b_result
+    alpha_thick_grads = 2 * c_result * np.log10(freq_arr_broadcast[:, min_obs_idx]) + b_result
     alpha_thick_interval = get_credible_interval(alpha_thick_grads)
 
     # thin_idxs = np.around(freq_arr.shape[0] + (freq_arr.shape[0] - peak_idxs)*0.5)
     # alpha_thin_grads = 2*c_result*flux_dist[thin_idxs] + b_result
-    alpha_thin_grads = 2 * c_result * flux_dist[:, max_obs_idx] + b_result
+    alpha_thin_grads = 2 * c_result * np.log10(freq_arr_broadcast[:, max_obs_idx]) + b_result
     alpha_thin_interval = get_credible_interval(alpha_thin_grads)
 
     # write dict to result object
@@ -500,7 +500,6 @@ def get_orienti_intervals(
     result.param_intervals["peak_flux_interval"] = flux_credible_interval
     result.param_intervals["alpha_thick_interval"] = alpha_thick_interval
     result.param_intervals["alpha_thin_interval"] = alpha_thin_interval
-
     return (
         freq_credible_interval,
         flux_credible_interval,
