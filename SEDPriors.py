@@ -131,9 +131,9 @@ class SEDPriors:
 
         self.snellen_prior_dict = bilby.core.prior.PriorDict()
 
-        # prior for a (peak freq) - from ~50MHz to 500 GHz (50-500e3) so we want LogUniform
+        # prior for a (peak freq) - from ~50MHz to 100 GHz (50-10e4) so we want LogUniform
         self.snellen_prior_dict[prefix + "a"] = bilby.prior.LogUniform(
-            minimum=50, maximum=50e3
+            minimum=50, maximum=10e4
             #minimum=50, maximum =1e3
         )
 
@@ -177,9 +177,9 @@ class SEDPriors:
         # bilby priors
         self.retrig_prior_dict = bilby.core.prior.PriorDict()
 
-        # prior for a (peak freq) - from ~50MHz to 500 GHz (50-500e3) so we want LogUniform
+        # prior for a (peak freq) - from ~50MHz to 100 GHz (50-10e4) so we want LogUniform
         self.retrig_prior_dict[prefix + "a"] = bilby.prior.LogUniform(
-            minimum=50, maximum=50e3
+            minimum=50, maximum=10e4
         )
 
         # prior for b (peak flux) - from ~50mJy to 10Jy (50e-3 - 10) so LogUniform again
@@ -197,7 +197,7 @@ class SEDPriors:
 
         # prior for Snorm (norm factor on power law)
         self.retrig_prior_dict[prefix + "S_norm"] = bilby.prior.LogUniform(
-            minimum=1, maximum=1e5
+            minimum=1e-4, maximum=1e5
         )
 
         # prior for alpha (spectral index on power law)
