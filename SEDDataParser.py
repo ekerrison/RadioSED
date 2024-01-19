@@ -140,18 +140,20 @@ class SEDDataParser:
             peak_datarow = peak_datarow.squeeze()
 
         # if uncertainties not the same length as fluxes, check for CCA survey, which doesn't have errors on Vizier
-        if len(datarow["survey_fluxes"]) != len(datarow["survey_flux_errs"]):
+        if len(datarow["survey_fluxes"].squeeze()) != len(datarow["survey_flux_errs"].squeeze()):
             # raise ValueError('mismatch length beween fluxes and uncertainties!')
-            if "CCA" in datarow["survey_names"]:
+            if "CCA" in datarow["survey_names"].squeeze():
                 # if CCA then insert a 10% flux error
-                first_surv_idx = datarow["survey_names"].index("CCA")
-                datarow["survey_flux_errs"].insert(
-                    first_surv_idx, datarow["survey_fluxes"][first_surv_idx] * 0.1
+                first_surv_idx = datarow["survey_names"].squeeze().index("CCA")
+                temp_err_list = datarow["survey_flux_errs"].squeeze()
+                print(len(temp_err_list))
+                datarow["survey_flux_errs"].squeeze().insert(
+                    first_surv_idx, datarow["survey_fluxes"].squeeze()[first_surv_idx] * 0.1
                 )
                 # and second CCA flux
-                datarow["survey_flux_errs"].insert(
+                datarow["survey_flux_errs"].squeeze().insert(
                     first_surv_idx + 1,
-                    datarow["survey_fluxes"][first_surv_idx + 1] * 0.1,
+                    datarow["survey_fluxes"].squeeze()[first_surv_idx + 1] * 0.1,
                 )
             else:
                 print(datarow["survey_fluxes"], datarow["survey_flux_errs"])
@@ -169,7 +171,7 @@ class SEDDataParser:
                 "Survey quickname": datarow["survey_names"].squeeze(),
             }
         )
-        print(flux_data)
+
         # drop vlssr as it is peak flux!
         if "vlssr" in flux_data["Survey quickname"].apply(lambda x: x.lower()).tolist():
             # get index and drop because it's peak!
