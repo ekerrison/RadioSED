@@ -146,7 +146,6 @@ class SEDDataParser:
                 # if CCA then insert a 10% flux error
                 first_surv_idx = datarow["survey_names"].squeeze().index("CCA")
                 temp_err_list = datarow["survey_flux_errs"].squeeze()
-                print(len(temp_err_list))
                 datarow["survey_flux_errs"].squeeze().insert(
                     first_surv_idx, datarow["survey_fluxes"].squeeze()[first_surv_idx] * 0.1
                 )
