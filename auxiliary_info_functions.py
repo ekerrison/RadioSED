@@ -117,7 +117,7 @@ class AuxInfo:
         if racs_viz is None:
             racs_viz = self.racs_vizier
 
-        src_name = src_name.strip("RACS-DR1 ")
+        src_name = src_name.replace("RACS-DR1 ", "")
         res = Vizier.query_object(src_name, catalog=racs_viz)[0].to_pandas()
         n_gaus = res["Ng"].values[0]
         fluxratio = res["Fpk"].values[0] / res["Ftot"].values[0]
