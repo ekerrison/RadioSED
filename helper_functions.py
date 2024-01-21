@@ -760,6 +760,9 @@ def get_retrig_intervals(
         max_lower_idx -= 3
         min_upper_idx += 3
 
+    if max_lower_idx == 0:
+        max_lower_idx += 1
+
     print(
         "calculating indices at: {:.2f}, {:.2f}, {:.2f}, {:.2f} MHz".format(
             freq_arr[max_lower_idx],
