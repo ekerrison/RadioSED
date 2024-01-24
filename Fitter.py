@@ -18,7 +18,7 @@ class Fitter:
         model_list="all",
         name: str = None,
         lower_freq=1e7,
-        upper_freq=1e11,
+        upper_freq=9e11,
         output_dir="output",
         overwrite=False,
         use_nestcheck=False,

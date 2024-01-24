@@ -33,7 +33,7 @@ class RadioSEDModel:
         model_func: FunctionType,
         src_name: str,
         fit_min=1.0e7,
-        fit_max=1e11,
+        fit_max=9e11,
         fit_errs=True,
         new_flag=False,
         output_dir="output",
