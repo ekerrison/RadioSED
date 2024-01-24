@@ -16,7 +16,7 @@ class Plotter:
         plotpath="output/model_plots/",
         z: float = None,
         lower_freq=1e7,
-        upper_freq=1e11,
+        upper_freq=9e11,
         savestr_end="",
     ):
         self.result_array = self.update_results(result_array)
@@ -691,8 +691,8 @@ class Plotter:
         ax.tick_params(axis="y", direction="in", which="both", length=3, right=True)
         ax.tick_params(axis="x", direction="in", which="both", length=3, top=True)
         # and make them not scientific
-        ax.xaxis.set_major_formatter(mticker.ScalarFormatter())
-        ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
+        #ax.xaxis.set_major_formatter(mticker.ScalarFormatter())
+        ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.1g"))
         # plt.legend(loc = 'upper center', ncol = 3, bbox_to_anchor=(0.5, -0.15))
         # plt.grid(True)
         # plt.title(obj_name)
