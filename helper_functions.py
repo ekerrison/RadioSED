@@ -593,6 +593,11 @@ def get_retrig_intervals(
         freq_max_new = freq_arr[np.min(np.argwhere(flux_dist < 20e-5)[indices, 1])]
         freq_max_new = 1e6*freq_max_new
 
+        print('new max freq: {}GHz'.format(freq_max_new/1e6))
+        if freq_max_new/1e6 < 500:
+            freq_max_new = freq_arr[np.max(np.argwhere(flux_dist < 20e-5)[indices, 1])]
+            freq_max_new = 1e6*freq_max_new
+        print('new max freq (second try): {}GHz'.format(freq_max_new/1e6))
         freq_arr = 10 ** (
             np.linspace(np.log10(freq_min / 1e6), np.log10(freq_max_new / 1e6), 1000)
         )  # np.linspace(np.log10(70), np.log10(30e3)
@@ -613,6 +618,9 @@ def get_retrig_intervals(
         flux_dist = flux_dist.transpose()
 
     #extra check to make sure this is really gone
+    print('number below error threshold:')
+    print(flux_dist[flux_dist < 10e-5].shape[0])
+    '''
     freq_max_loop = freq_max
     while flux_dist[flux_dist < 10e-5].shape[0] > 0:
         print(flux_dist[flux_dist < 10e-5].shape[0])
@@ -637,7 +645,7 @@ def get_retrig_intervals(
             alpha_result,
         )
         flux_dist = flux_dist.transpose()
-
+    '''
 
     # use np.diff to find turning pts
     diff_dist = np.diff(flux_dist, axis=1)
