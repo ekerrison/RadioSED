@@ -174,7 +174,7 @@ class Fitter:
             fit_params = []
             fit_param_names = ['peak_freq', 'peak_flux', 'trough_freq', 'trough_flux',\
                 'alpha_retrig', 'alpha_thick', 'alpha_thin']
-            for param_idx in range(len(best_model_info[:-1])):
+            for param_idx in range(len(fit_param_names)):
                 params = best_model_info[param_idx]
                 temp = TemplateInterval()
                 temp.name = fit_param_names[param_idx]
@@ -196,7 +196,7 @@ class Fitter:
 
             fit_params = []
             fit_param_names = ['peak_freq', 'peak_flux', 'alpha_thick', 'alpha_thin']
-            for param_idx in range(len(best_model_info[:-1])):
+            for param_idx in range(len(fit_param_names)):
                 params = best_model_info[param_idx]
                 temp = TemplateInterval()
                 temp.name = fit_param_names[param_idx]
