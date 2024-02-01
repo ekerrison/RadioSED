@@ -229,7 +229,7 @@ class AuxInfo:
             res = Vizier.query_region(catalog=self.racs_vizier, coordinates=ned_name, radius = 60*u.arcsec)[
                 0
             ].to_pandas()
-        return res['RACS-DR1']
+        return res['RACS-DR1'].values[0], res['RAJ2000'].values[0], res['DEJ2000'].values[0]
 
 
 # tests
