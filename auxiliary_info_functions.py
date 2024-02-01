@@ -220,8 +220,16 @@ class AuxInfo:
         return racs_iau_name
 
 
-    def find_racs_src(self, ra, dec, racs_id=None):
-        return racs_iau_name
+    def find_racs_src(self, ra=None, dec=None, racs_id=None, ned_name=None):
+        if ra is not None:
+            res = Vizier.query_region(catalog=self.racs_vizier, coordinates=Coord.SkyCoord(ra=ra, dec=dec, unit=(u.deg,u.deg)), radius = 10*u.arcsec)[
+                0
+            ].to_pandas()
+        elif ned_name is not None:
+            res = Vizier.query_region(catalog=self.racs_vizier, coordinates=ned_name, radius = 60*u.arcsec)[
+                0
+            ].to_pandas()
+        return res['RACS-DR1']
 
 
 # tests
