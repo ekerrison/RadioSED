@@ -29,8 +29,12 @@ class Plotter:
         self.fit_max = upper_freq
         self.plot_curves = None
 
-        if not os.path.isdir(os.path.join(os.getcwd(), self.plotpath)):
-            os.mkdir(os.path.join(os.getcwd(), self.plotpath))
+        if not plotpath.startswith('/'):
+            if not os.path.isdir(os.path.join(os.getcwd(), self.plotpath)):
+                os.mkdir(os.path.join(os.getcwd(), self.plotpath))
+        else:
+            if not  os.path.isdir(self.plotpath):
+                os.mkdir(self.plotpath)
         return
 
     def update_results(self, result_array):
@@ -691,8 +695,11 @@ class Plotter:
         ax.tick_params(axis="y", direction="in", which="both", length=3, right=True)
         ax.tick_params(axis="x", direction="in", which="both", length=3, top=True)
         # and make them not scientific
-        #ax.xaxis.set_major_formatter(mticker.ScalarFormatter())
-        ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.1g"))
+        ax.xaxis.set_major_formatter(mticker.ScalarFormatter())
+        if ax.get_ylim()[0] < 0.005:
+            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.1g"))
+        else:
+            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
         # plt.legend(loc = 'upper center', ncol = 3, bbox_to_anchor=(0.5, -0.15))
         # plt.grid(True)
         # plt.title(obj_name)
