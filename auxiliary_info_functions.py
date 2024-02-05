@@ -146,7 +146,12 @@ class AuxInfo:
 
         num_neighbours = res.shape[0]
         confusion_flag = False
+        #flag for possible confusion if num neighbours > 1 and flux ratio for any is > 0.1
         if num_neighbours > 1:
+            print(res)
+            ratios = res.loc[1:,'Fintwide']/res.loc[0,'Fintwide']
+            print(ratios)
+            print(ratios[ratios > 0.1].any())
             confusion_flag = True
         return confusion_flag, num_neighbours
 
