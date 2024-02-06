@@ -380,8 +380,9 @@ class SEDDataParser:
                         "Survey quickname": [surveys_used.loc[idx, "Name"]],
                     }
                 )
-                photometry_table = pd.concat(
-                    [photometry_table, single_row], ignore_index=True, axis=0
+                photometry_table = (single_row.copy() if photometry_table.empty
+                    else pd.concat(
+                    [photometry_table, single_row], ignore_index=True, axis=0)
                 )
 
                 peak_single_row = pd.DataFrame(
@@ -396,8 +397,8 @@ class SEDDataParser:
                         "Survey quickname": [surveys_used.loc[idx, "Name"]],
                     }
                 )
-                peak_phot_table = pd.concat(
-                    [peak_phot_table, peak_single_row], ignore_index=True, axis=0
+                peak_phot_table = (peak_single_row.copy() if peak_phot_table.empty 
+                    else pd.concat([peak_phot_table, peak_single_row], ignore_index=True, axis=0)
                 )
 
                 continue
