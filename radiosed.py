@@ -93,7 +93,7 @@ if args.write_output is not None:
 #changes have been made since the last release to ensure it works with dynamic nested
 #sampling from dynesty using batch sampling (see: https://github.com/ejhigson/nestcheck/pull/9)
 fitter = Fitter(overwrite=args.overwrite, use_nestcheck=False, upper_freq=args.max_freq)
-plotter = Plotter(plotpath="/output/model_plots/", upper_freq=args.max_freq)
+plotter = Plotter(plotpath="output/model_plots/", upper_freq=args.max_freq)
 priors = SEDPriors()
 info = AuxInfo()
 
