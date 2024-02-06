@@ -40,18 +40,41 @@ More documentation coming soon!
 
 ## Usage
 
-To run RadioSED you will obviously need both [Bilby](https://lscsoft.docs.ligo.org/bilby/#) and [Dynesty](https://dynesty.readthedocs.io/en/latest/index.html), but additional 
-package requirements can be found in `requirements.txt` (for pip-compatible formatting) or `environment.yml` (for anaconda-style formatting).  
+First clone RadioSED into a working directory of your choosing:
+`git clone https://github.com/ekerrison/RadioSED.git`
+
+Then you will need to install all of the dependencies for RadioSED. At the simplest level there are four main packages required:
+- [Bilby](https://lscsoft.docs.ligo.org/bilby/#) (version 2.1 for gauranteed compatibility)
+- [George](https://george.readthedocs.io/en/latest/)
+- [Dynesty](https://dynesty.readthedocs.io/en/latest/index.html)
+- [Astroquery](https://astroquery.readthedocs.io/en/latest/)
+
+RadioSED is tested with Python 3.10.
+
+These can be downloaded using your favourite package manager. If you are using Anaconda/Conda this can be achieved in a single line:
+`conda install -c conda-forge george bilby=2.1 astroquery`
+(note that installing bilby will also install the correct version of dynesty).
+
+A comprehensive list of package requirements can be found in `requirements.txt` (for pip-compatible formatting) or `environment.yml` (for anaconda-style formatting).  
 If you are running anaconda or miniconda, once you clone this repo you can run `conda env create -n radiosed -f environment.yml` from within the folder to create a new environment
 with all the packages required to run RadioSED.
 
-You will also need to have [Git Large File Storage](https://git-lfs.com/) installed in order to download the requisite files (you may need to do another `git pull` or `git lfs fetch` after installing the LFS
-in order to pull these files across). The necessary files are located within the `data\` subdirectory.
+You will also need unzip some data files after you have cloned the repository. These are the `allsky_peak_masterlist.tar.gz` and `allsky_masterlist.tar.gz` files located within the `data\` subdirectory.
 
 If you would like to make use of the pre-determined crossmatches that come with RadioSED, you will need to initialise the DataParser with option `use_local=True`.
 
 To see how RadioSED is run, please take a look at the `run_radiosed.py` script. This can be used as the main script from which you run fitting on your own sources, or it can
-be modified to suit your needs.
+be modified to suit your needs. There is also the option to use RadioSED with a command line interface by calling `radiosed.py`. Call `python radiosed.py -h` for help and usage options.
+
+## Examples
+There are some example data and input files located in the `example_files/` directory. They can be used to understand several RadioSED options which can be tested with the following code:
+- Running RadioSED from the command line on a single source: `python radiosed.py -n J213437.6-235535`
+- Running RadioSED from the command line on a number of sources stored in an input file: `python radiosed.py -f example_files/input_sources.csv`
+- Running RadioSED from the command line on a single source with censored data: `python radiosed.py -n J090331.3+010849 -c example_files/J090331.3+010849_flux_table_censored.csv`
+
+There are more options for saving output data to file, overwriting data from previous runs and using different inputs to identify sources. All of these can be found by calling `python radiosed.py -h`.
+
+The example flux_table files should be used as a template for formatting if you want to use your own flux density data with RadioSED.
 
 ## Citation
 
