@@ -4,6 +4,6 @@ output/
 .DS_Store
 outdir/
 notes_list.md
-run_radiosed_optimal_obs.py
+run_radiosed_*
 scripts/
 nestcheck_synthetic.py
