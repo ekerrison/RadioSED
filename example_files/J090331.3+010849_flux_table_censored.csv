@@ -1,0 +1,5 @@
+Frequency (Hz),Flux Density (Jy),Uncertainty,Survey quickname,Refcode,Upper limits
+144000000.0,0.4,0.04,LOFAR,2024....xxx.xxxx,True
+887500000.0,0.074068,0.002221,RACS,2021PASA...38...58H,False
+1400000000.0,0.0631,0.001899999976158142,NVSS,1998AJ....115.1693C,False
+4850000000.0,0.052,0.011,PMNE,1994ApJS...91..111W,False
