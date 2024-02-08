@@ -546,7 +546,6 @@ def get_retrig_intervals(
     else:
         prefix = ""
 
-    print(min_obs_freq, max_obs_freq)
 
     # a hack so this function works with both bilby and jaxns
     if bilby:
@@ -593,11 +592,11 @@ def get_retrig_intervals(
         freq_max_new = freq_arr[np.min(np.argwhere(flux_dist < 20e-5)[indices, 1])]
         freq_max_new = 1e6*freq_max_new
 
-        print('new max freq: {}GHz'.format(freq_max_new/1e6))
+        #print('new max freq: {}GHz'.format(freq_max_new/1e6))
         if freq_max_new/1e6 < 500:
             freq_max_new = freq_arr[np.max(np.argwhere(flux_dist < 20e-5)[indices, 1])]
             freq_max_new = 1e6*freq_max_new
-        print('new max freq (second try): {}GHz'.format(freq_max_new/1e6))
+        #print('new max freq (second try): {}GHz'.format(freq_max_new/1e6))
         freq_arr = 10 ** (
             np.linspace(np.log10(freq_min / 1e6), np.log10(freq_max_new / 1e6), 1000)
         )  # np.linspace(np.log10(70), np.log10(30e3)
@@ -618,9 +617,10 @@ def get_retrig_intervals(
         flux_dist = flux_dist.transpose()
 
     #extra check to make sure this is really gone
+    '''
     print('number below error threshold:')
     print(flux_dist[flux_dist < 10e-5].shape[0])
-    '''
+    
     freq_max_loop = freq_max
     while flux_dist[flux_dist < 10e-5].shape[0] > 0:
         print(flux_dist[flux_dist < 10e-5].shape[0])
@@ -670,10 +670,12 @@ def get_retrig_intervals(
     local_min_idxs = np.where(signchange > 0)
     local_max_idxs = np.where(signchange < 0)
 
+    '''
     print(flux_dist.shape)
     print(freq_arr_broadcast.shape)
     print(local_min_idxs[0].shape)
     print(local_max_idxs[0].shape)
+    '''
 
     # get max and min fluxes based on this
     max_fluxes = flux_dist[local_max_idxs]
@@ -707,20 +709,12 @@ def get_retrig_intervals(
         np.abs(freq_arr - peak_freq_interval[0] * (1 + distance_factor))
     )
 
-    # max_lower_idx = np.argmin(np.abs(np.log10(freq_arr) - (np.log10(peak_freq_interval[0]) - distance_factor)))
-    # max_upper_idx = np.argmin(np.abs(np.log10(freq_arr) - (np.log10(peak_freq_interval[0]) + distance_factor)))
-
     min_lower_idx = np.argmin(
         np.abs(freq_arr - trough_freq_interval[0] * (1 - distance_factor))
     )
     min_upper_idx = np.argmin(
         np.abs(freq_arr - trough_freq_interval[0] * (1 + distance_factor))
     )
-
-    # max_lower_idx = np.argmin(np.abs(np.log10(freq_arr) - (np.log10(trough_freq_interval[0]) - distance_factor)))
-    # max_upper_idx = np.argmin(np.abs(np.log10(freq_arr) - (np.log10(trough_freq_interval[0]) + distance_factor)))
-
-    print(max_upper_idx)
 
     # find if the peak is above or below the trough in frequency
     # print('peak and trough intervals')
@@ -740,9 +734,6 @@ def get_retrig_intervals(
     # if trough_freq_interval[0] < min_obs_freq/1e6:
     #    trough_freq_interval = [-1,0,0]
     #    trough_flux_interval = [-1,0,0]
-
-    print("lower_idx: {}".format(min_lower_idx))
-    print("upper_idx: {}".format(max_upper_idx))
 
     if min_lower_idx == 0:
         distance_factor = 0.1  # x100 = per cent
@@ -771,6 +762,7 @@ def get_retrig_intervals(
     if max_lower_idx == 0:
         max_lower_idx += 1
 
+    '''
     print(
         "calculating indices at: {:.2f}, {:.2f}, {:.2f}, {:.2f} MHz".format(
             freq_arr[max_lower_idx],
@@ -779,6 +771,7 @@ def get_retrig_intervals(
             freq_arr[min_upper_idx],
         )
     )
+    '''
 
     #if we have no turning pts, asusme linear and just return the spectral index
     if (min_lower_idx == max_upper_idx and min_lower_idx == 0) or (max_lower_idx == min_lower_idx and max_upper_idx == min_upper_idx):
@@ -941,7 +934,7 @@ def get_retrig_intervals(
 
     # we have only a peak and no trough - shouldn't happen we should pick SNELLEN
     elif trough_freq_interval[0] <= freq_min / 1e6 and peak_freq_interval[0] > 0:
-        warnings.warn("Only a peak no trough, so code should have picked Snellen!")
+        warnings.warn("Only a peak no trough, despite being fit by a retriggered model")
         func_type = "maxonly"
         # go from start to peak
         # alphathickgrads = (np.log10(flux_dist[local_max_idxs]) - np.log10(flux_dist[local_max_idxs[0],0]))/(np.log10(freq_arr_broadcast[local_max_idxs]) - np.log10(freq_arr_broadcast[local_max_idxs[0],0]))
@@ -989,7 +982,7 @@ def get_retrig_intervals(
     else:
         print(peak_freq_interval)
         print(peak_flux_interval)
-        print("should not be here")
+        print("Something has gone wrong in fitting, please go back and check the bilby logs")
         exit()
 
     # write dict to result object
