@@ -38,10 +38,14 @@ Where the 'survey quickname' is some easily identifiable name (e.g. RACS) and th
 
 More documentation coming soon!
 
-## Usage
+## Setup
 
 First clone RadioSED into a working directory of your choosing:
-`git clone https://github.com/ekerrison/RadioSED.git`
+> `git clone https://github.com/ekerrison/RadioSED.git`
+
+RadioSED is tested with Python 3.10. If you are familiar with Anaconda environments I recommend setting up a new one:
+> `conda create --name radiosed python=3.10`
+> `conda activate radiosed`
 
 Then you will need to install all of the dependencies for RadioSED. At the simplest level there are four main packages required:
 - [Bilby](https://lscsoft.docs.ligo.org/bilby/#) (version 2.1 for gauranteed compatibility)
@@ -49,26 +53,31 @@ Then you will need to install all of the dependencies for RadioSED. At the simpl
 - [Dynesty](https://dynesty.readthedocs.io/en/latest/index.html)
 - [Astroquery](https://astroquery.readthedocs.io/en/latest/)
 
-RadioSED is tested with Python 3.10.
-
 These can be downloaded using your favourite package manager. If you are using Anaconda/Conda this can be achieved in a single line:
-`conda install -c conda-forge george bilby=2.1 astroquery`
+> `conda install -c conda-forge george bilby=2.1 astroquery`
 (note that installing bilby will also install the correct version of dynesty).
 
 A comprehensive list of package requirements can be found in `requirements.txt` (for pip-compatible formatting) or `environment.yml` (for anaconda-style formatting).  
 If you are running anaconda or miniconda, once you clone this repo you can run `conda env create -n radiosed -f environment.yml` from within the folder to create a new environment
 with all the packages required to run RadioSED.
 
-You will also need unzip some data files after you have cloned the repository. These are the `allsky_peak_masterlist.tar.gz` and `allsky_masterlist.tar.gz` files located within the `data\` subdirectory.
+You will also need decompress some data files after you have cloned the repository. These are the `allsky_peak_masterlist.tar.gz` and `allsky_masterlist.tar.gz` files located within the `data\` subdirectory.
+This can be achieved with the following commands from the main RadioSED directory:
+> `tar -xvf data/allsky_masterlist.tar.gz -C data`
+> `tar -xvf data/allsky_peak_masterlist.tar.gz -C data`
 
 If you would like to make use of the pre-determined crossmatches that come with RadioSED, you will need to initialise the DataParser with option `use_local=True`.
+
+## Usage
 
 To see how RadioSED is run, please take a look at the `run_radiosed.py` script. This can be used as the main script from which you run fitting on your own sources, or it can
 be modified to suit your needs. There is also the option to use RadioSED with a command line interface by calling `radiosed.py`. Call `python radiosed.py -h` for help and usage options.
 
+Please note that to perform the default, 4-model inference on one source can take between 5-15 minutes depending on the specifications of the machine you are using.
+
 ## Examples
 There are some example data and input files located in the `example_files/` directory. They can be used to understand several RadioSED options which can be tested with the following code:
-- Running RadioSED from the command line on a single source: `python radiosed.py -n J213437.6-235535`
+- Running RadioSED from the command line on a single source and produce output plots: `python radiosed.py -n J213437.6-235535 -p`
 - Running RadioSED from the command line on a number of sources stored in an input file: `python radiosed.py -f example_files/input_sources.csv`
 - Running RadioSED from the command line on a single source with censored data: `python radiosed.py -n J090331.3+010849 -c example_files/J090331.3+010849_flux_table_censored.csv`
 
