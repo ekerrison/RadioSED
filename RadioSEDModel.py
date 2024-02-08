@@ -211,7 +211,7 @@ class RadioSEDModel:
         # calculate information criteria
         self.fit_bic = self.fit_chisq + len(self.fit_params) * np.log(len(self.freq))
 
-        return self.fit_bic, self.chi_squared
+        return self.fit_bic, self.fit_chisq
 
     def get_log10z(self):
         """returns the log10 evidence and associated error"""
