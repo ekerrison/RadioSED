@@ -75,12 +75,12 @@ class RadioSEDGPModel(RadioSEDModel):
         return
 
     def get_bic(self):
-        if not hasattr(self, fit_params_func):
+        if not hasattr(self, 'fit_params_func'):
             self.fit_params_func = [
                 self.result.get_one_dimensional_median_and_error_bar(x).median
                 for x in self.priorkeys[:-2]
             ]
-        if not hasattr(self, fit_params_noise):
+        if not hasattr(self, 'fit_params_noise'):
             self.fit_params_noise = [
                 self.result.get_one_dimensional_median_and_error_bar(x).median
                 for x in self.priorkeys[-2:]
@@ -94,7 +94,7 @@ class RadioSEDGPModel(RadioSEDModel):
 
         # creating the GP model
         self.final_gp = george.GP(
-            kernel=self.final_kernel, mean=self.__SED_func__(*self.fit_params_func)
+            kernel=self.final_kernel, mean=self.__SED_func__(self.freq, *self.fit_params_func)
         )  # , white_noise=white_noise_mod) #Joe used 0.2*matern kernel (not sure why?! CHECK!)
 
         # setting up the model using x values in MHz to get the covariance matrix
@@ -114,20 +114,20 @@ class RadioSEDGPModel(RadioSEDModel):
         self.cov_mat = cholesky(self.cov_mat, overwrite_a=True, lower=False)
 
         # define x_modelled - x_obs in matrix notation
-        self.residuals = lambda params: SED_func(self.freq, *params) - self.flux
+        self.residuals = lambda params: self.__SED_func__(self.freq, *params) - self.flux
 
         # Define chi-squared calculation - THIS MUST USE MATRIX NOTATION SINCE WE HAVE COVARIANCE!
         self.fit_chisq = np.dot(
-            residuals(self.fit_params_func).T,
-            cho_solve((self.cov_mat, False), residuals(self.fit_params_func)),
+            self.residuals(self.fit_params_func).T,
+            cho_solve((self.cov_mat, False), self.residuals(self.fit_params_func)),
         )
 
         # calculate information criteria
-        fit_aic = fit_chisq + 2 * len(fit_params)
-        self.fit_bic = self.fit_chisq + len(self.fit_params_func) * np.log(
+        fit_aic = self.fit_chisq + 2 * (len(self.fit_params_func)+2)
+        self.fit_bic = self.fit_chisq + (len(self.fit_params_func)+2) * np.log(
             len(self.freq)
         )
-        return self.fit_bic
+        return self.fit_bic, self.fit_chisq
 
     def get_best_fit_func(self):
         if not hasattr(self, "fit_params_func"):
