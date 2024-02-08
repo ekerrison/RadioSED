@@ -1,3 +1,10 @@
+print('''##############################################
+#\t\t\t\t\t     #
+#\t\t  RadioSED\t\t     #
+# A Bayesian inference package for radio AGN #
+#\t\t\t\t\t     #
+##############################################''')
+
 #!/usr/bin/python
 import sys
 import os
@@ -18,6 +25,8 @@ from auxiliary_info_functions import AuxInfo
 
 #argparse
 import argparse
+
+print('initialising...')
 
 parser = argparse.ArgumentParser(prog='RadioSED',
     description='Run RadioSED from the command line.',
@@ -88,6 +97,10 @@ if args.write_output is not None:
 
 
 ## run RadioSED!
+#make sure output folder exists
+if not os.path.isdir(os.path.join(os.getcwd(), 'output')):
+    os.makedirs(os.path.join(os.getcwd(), 'output'), exist_ok = True)
+
 # initialise all the various classes needed
 #NOTE nestcheck must be installed directly from the github repo, as 
 #changes have been made since the last release to ensure it works with dynamic nested
