@@ -405,7 +405,6 @@ def get_credible_interval(array, interval=np.nan, lower_quant=0.16, upper_quant=
     # now get the quantiles!
     quants_to_compute = np.array([lower_quant, 0.5, upper_quant])
     quants = np.percentile(array, quants_to_compute * 100)
-    print('quants: ', quants)
     median = quants[1]
     plus = quants[2] - median
     minus = median - quants[0]
