@@ -146,7 +146,7 @@ def get_param_strs_toplot(model):
         prefix = ""
 
     # linear
-    if "linear" in model.model_type:
+    if "PL" in model.model_type:
         fit_param_intervals = model.get_param_medians_errors()
 
         # prior order is C, alpha
@@ -163,7 +163,7 @@ def get_param_strs_toplot(model):
         plot_str_list = [c_str, alpha_str]
 
     # orienti - put this back in!!
-    elif "orienti" in model.model_type:
+    elif "curved" in model.model_type:
         if not model.param_intervals:
             raise AttributeError(
                 '{} is the best model but its intervals have not been calculated yet, please call "get_orienti_intervals(model_object)" before plotting'.format(
@@ -194,7 +194,7 @@ def get_param_strs_toplot(model):
         plot_str_list = [peak_freq_str, peak_flux_str, alpha_thick_str, alpha_thin_str]
 
     # snellen
-    elif "snellen" in model.model_type:
+    elif "PS" in model.model_type:
         fit_param_intervals = model.get_param_medians_errors()
 
         # prior order is a,b,c,d

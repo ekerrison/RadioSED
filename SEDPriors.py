@@ -105,7 +105,8 @@ class SEDPriors:
 
         # for curvature parameter 'c' we are only interested
         # in fits with a negative curvature
-        self.orienti_prior_dict[prefix + "c"] = bilby.prior.LogUniform(minimum=-1e-5, maximum=0)
+        self.orienti_prior_dict[prefix + "c"] = bilby.prior.TruncatedNormal(mu=-1, 
+            sigma=5, minimum=-10000.0, maximum=0)
 
         return self.orienti_prior_dict
 

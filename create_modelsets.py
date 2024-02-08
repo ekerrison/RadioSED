@@ -10,7 +10,7 @@ priors = SEDPriors()
 # for a simple power law
 linear_gp_dict = {
     "has_GLEAM": True,
-    "model_type": "linear_gp",
+    "model_type": "PL_gp",
     "model_func": linear_sed_func,
     "plot_colour": "darkolivegreen",
     "prior_obj": priors.linear_gp_prior(),
@@ -21,7 +21,7 @@ linear_gp_dict = {
 # log-space parabola
 orienti_gp_dict = {
     "has_GLEAM": True,
-    "model_type": "orienti_gp",
+    "model_type": "curved_gp",
     "model_func": orienti_sed_func,
     "plot_colour": "b",
     "prior_obj": priors.orienti_gp_prior(),
@@ -32,7 +32,7 @@ orienti_gp_dict = {
 # simple PS model
 snellen_gp_dict = {
     "has_GLEAM": True,
-    "model_type": "snellen_gp",
+    "model_type": "PS_gp",
     "model_func": snellen_sed_func,
     "plot_colour": "darkorange",
     "prior_obj": priors.snellen_gp_prior(),
@@ -57,7 +57,7 @@ gp_model_list = [linear_gp_dict, orienti_gp_dict, snellen_gp_dict, retrig_gp_dic
 # non-GP models used when no GLEAM data available
 linear_dict = {
     "has_GLEAM": False,
-    "model_type": "linear",
+    "model_type": "PL",
     "model_func": linear_sed_func,
     "plot_colour": "darkolivegreen",
     "prior_obj": priors.linear_prior(),
@@ -66,7 +66,7 @@ linear_dict = {
 # log-space parabola
 orienti_dict = {
     "has_GLEAM": False,
-    "model_type": "orienti",
+    "model_type": "curved",
     "model_func": orienti_sed_func,
     "plot_colour": "b",
     "prior_obj": priors.orienti_prior(),
@@ -75,7 +75,7 @@ orienti_dict = {
 # simple PS model
 snellen_dict = {
     "has_GLEAM": False,
-    "model_type": "snellen",
+    "model_type": "PS",
     "model_func": snellen_sed_func,
     "plot_colour": "darkorange",
     "prior_obj": priors.snellen_prior(),
@@ -84,7 +84,7 @@ snellen_dict = {
 # retriggered PS model
 retrig_dict = {
     "has_GLEAM": False,
-    "model_type": "retriggered",
+    "model_type": "retrggered",
     "model_func": retriggered_sed_func,
     "plot_colour": "darkviolet",
     "prior_obj": priors.retrig_prior(),

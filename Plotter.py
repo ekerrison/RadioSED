@@ -199,6 +199,7 @@ class Plotter:
             + "_".join(self.name.split(" "))
             + "{}_raw.png".format(self.savestr_end),
             bbox_inches="tight",
+            dpi=300,
         )
         plt.close()
         return 
@@ -252,11 +253,12 @@ class Plotter:
                 color="m",
                 alpha=0.3,
                 edgecolor="none",
+                label='Stdev.'
             )
 
             # also plot mean function!
-            trend = self.result_array[0].likelihood.mean_model.get_value(xx)
-            ax.plot(xx, trend, color="m", alpha=0.3, lw=5, label="Mean")
+            #trend = self.result_array[0].likelihood.mean_model.get_value(xx)
+            #ax.plot(xx, trend, color="m", alpha=0.3, lw=5, label="Mean")
 
             # print('george model outputs:')
             # print(result_array[0].likelihood.gp.get_parameter_names())
@@ -383,6 +385,7 @@ class Plotter:
             + "_".join(self.name.split(" "))
             + "{}.png".format(self.savestr_end),
             bbox_inches="tight",
+            dpi=300,
         )
         plt.close()
         return
@@ -489,6 +492,7 @@ class Plotter:
             + "_".join(self.name.split(" "))
             + "_model{}_{}.png".format(model_idx, self.savestr_end),
             bbox_inches="tight",
+            dpi=300,
         )
         plt.close("all")
         return
@@ -572,6 +576,7 @@ class Plotter:
             + "_".join(self.name.split(" "))
             + "_bestfit{}.png".format(self.savestr_end),
             bbox_inches="tight",
+            dpi=300,
         )
         plt.close()
         return
@@ -610,6 +615,7 @@ class Plotter:
             + "_".join(self.name.split(" "))
             + "_bestfit{}_epoch.png".format(self.savestr_end),
             bbox_inches="tight",
+            dpi=300,
         )
         plt.close()
         return
@@ -677,6 +683,7 @@ class Plotter:
             + "_".join(self.name.split(" "))
             + "_bestfit{}_survey.png".format(self.savestr_end),
             bbox_inches="tight",
+            dpi=300,
         )
         # plt.show()
         plt.close()

@@ -19,7 +19,7 @@ class Fitter:
         name: str = None,
         lower_freq=1e7,
         upper_freq=9e11,
-        output_dir="output",
+        output_dir="output/bilby_output",
         overwrite=False,
         use_nestcheck=False,
         savestr_end="",
@@ -151,7 +151,7 @@ class Fitter:
         result_array, log10Z_arr, bmd_array = helper.get_best_model(result_array)
 
         peaked_spectrum = False
-
+        
         if (
             "retrig" in result_array[0].model_type
         ):
@@ -181,7 +181,7 @@ class Fitter:
                 temp.median, temp.minus, temp.plus = params[0], params[1], params[2]
                 fit_params.extend([temp])
 
-        elif "orienti" in result_array[0].model_type:
+        elif "curved" in result_array[0].model_type:
             peaked_spectrum = True
 
             best_model_info = helper.get_orienti_intervals(
@@ -203,7 +203,7 @@ class Fitter:
                 temp.median, temp.minus, temp.plus = params[0], params[1], params[2]
                 fit_params.extend([temp])
 
-        elif "snellen" in result_array[0].model_type:
+        elif "PS" in result_array[0].model_type:
             peaked_spectrum = True
 
             fit_params_bilby = result_array[0].get_param_medians_errors()
@@ -217,7 +217,7 @@ class Fitter:
                 temp.median, temp.minus, temp.plus = params.median, params.plus, params.minus
                 fit_params.extend([temp])
 
-        elif "lin" in result_array[0].model_type:
+        elif "PL" in result_array[0].model_type:
             peaked_spectrum = False
             
             fit_params_bilby = result_array[0].get_param_medians_errors()
