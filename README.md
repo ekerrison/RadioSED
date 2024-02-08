@@ -85,6 +85,10 @@ There are more options for saving output data to file, overwriting data from pre
 
 The example flux_table files should be used as a template for formatting if you want to use your own flux density data with RadioSED.
 
+## Output
+From the command line, you can tell RadioSED to provide plots with the `-p` flag and/or text-based output with the `-w` flag. Plots are saved by default under `output/model_plots`, while the 
+summary .csv will appear under `output/data`.
+
 ## Citation
 
 If this code is of any use to you in your research, please use the DOI to cite it directly (DOI:10.5281/zenodo.8336847). You can cite either the latest release, or a specific release which your research made use of. We would also appreciate a reference to our forthcoming paper (details coming soon!).
