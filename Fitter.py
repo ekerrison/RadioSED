@@ -214,7 +214,7 @@ class Fitter:
                 params = fit_params_bilby[param_idx]
                 temp = TemplateInterval()
                 temp.name = fit_param_names[param_idx]
-                temp.median, temp.minus, temp.plus = params.median, params.plus, params.minus
+                temp.median, temp.minus, temp.plus = params.median, params.minus, params.plus
                 fit_params.extend([temp])
 
         elif "PL" in result_array[0].model_type:
@@ -228,7 +228,7 @@ class Fitter:
                 params = fit_params_bilby[param_idx]
                 temp = TemplateInterval()
                 temp.name = fit_param_names[param_idx]
-                temp.median, temp.minus, temp.plus = params.median, params.plus, params.minus
+                temp.median, temp.minus, temp.plus = params.median, params.minus, params.plus
                 fit_params.extend([temp])
 
         return result_array, fit_params, log10Z_arr
