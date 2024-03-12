@@ -204,8 +204,10 @@ class SEDDataParser:
         # if alma has multiple fluxes at the same frequency (to the nearest 5ghz) that vary by more than 10 sigma, flag
         # this source as variable, and don't include fluxes in fitting
         alma_variable = -1
+        alma_vi = -1
         if almacal_pts.shape[0] > 0:
             alma_variable = self.is_alma_variable(almacal_pts)
+            alma_vi = self.get_alma_variability_index(almacal_pts)
             if not alma_variable:
                 # add almacal to flux_data
                 alma_count = 0
@@ -288,7 +290,7 @@ class SEDDataParser:
             peak_flux_data["Refcode"] = "2021PASA...38...58H"
             peak_flux_data["Frequency (Hz)"] = 888 * 1e6
             peak_flux_data["Survey quickname"] = "RACS"
-        return flux_data, peak_flux_data, alma_variable, racs_id
+        return flux_data, peak_flux_data, alma_variable, racs_id, alma_vi
 
     def query_vizier(self, cat, ra, dec, columns, radius):
         # radius to search (arcsec)
@@ -651,10 +653,12 @@ class SEDDataParser:
         )
         
         alma_variable = -1
+        alma_vi = -1
         if len(alma_fluxes) > 0:
             alma_fluxes = alma_fluxes[0].to_pandas()
             #check if variable
             alma_variable = self.is_alma_variable(alma_fluxes)
+            alma_vi = self.get_alma_variability_index(alma_fluxes)
             flux_idx = photometry_table.shape[0]
             if alma_fluxes.shape[0] > 0 and not alma_variable:
                 for alma_idx in alma_fluxes.index.tolist():
@@ -692,7 +696,7 @@ class SEDDataParser:
         photometry_table = photometry_table[photometry_table['Flux Density (Jy)'] > 0]
         peak_phot_table = peak_phot_table[peak_phot_table['Flux Density (Jy)'] > 0]
 
-        return photometry_table, peak_phot_table, alma_variable
+        return photometry_table, peak_phot_table, alma_variable, alma_vi
 
 
     def is_alma_variable(self, almacal_data: pd.DataFrame):
@@ -712,6 +716,30 @@ class SEDDataParser:
                 return True
         
         return False
+
+    def get_alma_variability_index(self, almacal_data: pd.DataFrame):
+        """Function to determine whether the source exhibits variability
+        in the ALMA band, based on flux density measurements from the ALMA
+        calibrator catalogue (Bonato+2019). This is methodologically simple,
+        we just check to see if there is variability at the 10 sigma level
+        over multiple epochs of ALMA observations in small bands"""
+        if almacal_data.shape[0] > 0:
+            #calculate the variability index for each band
+            vi_dict = dict()
+            for alma_band in almacal_data['Band'].unique():
+                if not almacal_data[almacal_data['Band'] == alma_band].shape[0] > 1:
+                    continue
+                fluxes = almacal_data.loc[almacal_data['Band'] == alma_band, 'Flux']
+                uncertainties = almacal_data.loc[almacal_data['Band'] == alma_band, 'e_Flux']
+                mean_flux = np.mean(fluxes)
+                #follow Barvainis e tal.(2005), Sadler et al. (2006) and set VI to be negative if value inside
+                # square root is negative
+                sqrt_term = np.sum((fluxes - mean_flux)**2) - np.sum(uncertainties**2)
+                var_index = np.sign(sqrt_term)*(100/mean_flux)*np.sqrt(np.abs(sqrt_term))/np.sqrt(fluxes.shape[0])
+                vi_dict[alma_band] = var_index
+            return vi_dict
+        return np.nan
+
 
     def add_survey_radius(self, survey_viz):
         """Function to add info automatically to the list of included surveys. Currently
