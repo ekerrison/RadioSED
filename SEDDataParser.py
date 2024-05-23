@@ -660,6 +660,7 @@ class SEDDataParser:
             alma_variable = self.is_alma_variable(alma_fluxes)
             alma_vi = self.get_alma_variability_index(alma_fluxes)
             flux_idx = photometry_table.shape[0]
+            print(alma_fluxes)
             if alma_fluxes.shape[0] > 0 and not alma_variable:
                 for alma_idx in alma_fluxes.index.tolist():
                     photometry_table.loc[flux_idx + alma_idx + 1, "Frequency (Hz)"] = (
@@ -674,7 +675,7 @@ class SEDDataParser:
                     photometry_table.loc[
                         flux_idx + alma_idx + 1, "Survey quickname"
                     ] = "ALMACAL"
-                    photometry_table.loc[flux_idx + alma_idx + 1, "Refcode"] = alma_refcode
+                    photometry_table.loc[flux_idx + alma_idx + 1, "Refcode"] = alma_fluxes.loc[alma_idx, "_tab2_10"][0:4] + '/' + alma_refcode
 
         # now sort the table so that it is in ascending frequency order
         photometry_table["Frequency (Hz)"] = (
