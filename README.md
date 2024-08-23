@@ -50,12 +50,11 @@ RadioSED is tested with Python 3.10. If you are familiar with Anaconda environme
 Then you will need to install all of the dependencies for RadioSED. At the simplest level there are four main packages required:
 - [Bilby](https://lscsoft.docs.ligo.org/bilby/#) (version 2.1 for gauranteed compatibility)
 - [George](https://george.readthedocs.io/en/latest/)
-- [Dynesty](https://dynesty.readthedocs.io/en/latest/index.html)
+- [Dynesty](https://dynesty.readthedocs.io/en/latest/index.html) (version 2.1.2 for compatibility with Bilby)
 - [Astroquery](https://astroquery.readthedocs.io/en/latest/)
 
 These can be downloaded using your favourite package manager. If you are using Anaconda/Conda this can be achieved in a single line:
-> `conda install -c conda-forge george bilby=2.1 astroquery`
-(note that installing bilby will also install the correct version of dynesty).
+> `conda install -c conda-forge george bilby=2.1 astroquery dynesty=2.1.2`
 
 A comprehensive list of package requirements can be found in `requirements.txt` (for pip-compatible formatting) or `environment.yml` (for anaconda-style formatting).  
 If you are running anaconda or miniconda, once you clone this repo you can run `conda env create -n radiosed -f environment.yml` from within the folder to create a new environment
