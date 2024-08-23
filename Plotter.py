@@ -1,10 +1,18 @@
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
+import matplotlib.colors as mcolors
 import os
 import helper_functions as helper
 import pandas as pd
 import numpy as np
 
+def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=-1):
+    if n == -1:
+        n = cmap.N
+    new_cmap = mcolors.LinearSegmentedColormap.from_list(
+         'trunc({name},{a:.2f},{b:.2f})'.format(name=cmap.name, a=minval, b=maxval),
+         cmap(np.linspace(minval, maxval, n)))
+    return new_cmap
 
 class Plotter:
     def __init__(
@@ -390,7 +398,7 @@ class Plotter:
         plt.close()
         return
 
-    def plot_model_range(self, throw_figure=False, model_idx=0, fig=None, ax=None):
+    def plot_model_range(self, throw_figure=False, model_idx=0, fig=None, ax=None, colour_idx=None):
         """Function showing the best fitting model for the model type with the largest Bayesian
         evidence, as well as draws from the posterior to get a feel for the range of acceptable models
         """
@@ -401,27 +409,32 @@ class Plotter:
             temp1, temp2, xx = self.init_plot()
             plt.close(temp1)
 
+        # specify colour idx
+        if colour_idx is None:
+            colour_idx = model_idx
+
         fig, ax, main_pts, lim_pts = self.add_data(fig, ax)
 
         if self.plot_curves is None:
             self.plot_curves = [self.result_array[model_idx].get_best_fit_func()]
 
         # plot best fit
-        c_main = ["darkred", "darkblue", "darkgreen", "darkviolet", "darkorange"]
+        c_main = ["darkred", "darkblue", "darkgreen", "darkviolet", "darkorange", "k"]
         ax.plot(
             xx,
             self.plot_curves[model_idx],
-            c=c_main[model_idx],
+            c=c_main[colour_idx],
             alpha=1,
             label="Best model",
+            zorder=500,
         )
 
         # plot range
-        c_range = ["firebrick", "royalblue", "forestgreen", "mediumpurple", "orange"]
+        c_range = ["firebrick", "royalblue", "forestgreen", "mediumpurple", "orange", "lightslategray"]
         fit_range = self.result_array[model_idx].get_fit_range_funcs()
         fit_range = fit_range.T
         xarr = np.array([xx] * fit_range.shape[1]).T
-        ax.plot(xarr, fit_range, lw=1, color=c_range[model_idx], alpha=0.15)
+        ax.plot(xarr, fit_range, lw=1, color=c_range[colour_idx], alpha=0.15)
 
         if throw_figure:
             return fig, ax, main_pts
@@ -497,12 +510,12 @@ class Plotter:
         plt.close("all")
         return
 
-    def plot_best_model(self, throw_figure=False):
+    def plot_best_model(self, throw_figure=False, colour_idx=None):
         """Function to plot the best fitting model as determined by the Bayes factor
         (Bayesian Evidence). This plots both the best fitting realisation, as well as 
         several addtional realisations from the posterior. Text is added to provide
         useful information about the model, such as the parameter estimates."""
-        fig, ax, main_pts = self.plot_model_range(throw_figure=True, model_idx=0)
+        fig, ax, main_pts = self.plot_model_range(throw_figure=True, model_idx=0, colour_idx=colour_idx)
 
         if throw_figure:
             return fig, ax, main_pts
@@ -582,13 +595,18 @@ class Plotter:
         return
 
     def plot_epoch(self):
-        """Function to plot pooints coloured by epoch, based on the date captured
+        """Function to plot points coloured by epoch, based on the date captured
         as part of the Bibcode for each survey."""
 
-        fig, ax, main_pts = self.plot_best_model(throw_figure=True)
+        fig, ax, main_pts = self.plot_best_model(throw_figure=True, colour_idx=5)
 
         # get rid of those standard black points from the plot!
         main_pts.remove()
+
+        # truncate the colormap
+        minColor = 0.2
+        maxColor = 1.0
+        plasma_t = truncate_colormap(plt.get_cmap("plasma"), minColor, maxColor)
 
         # epoch
         ax.errorbar(
@@ -603,12 +621,20 @@ class Plotter:
         cdata = ax.scatter(
             self.plot_freqs,
             self.plot_fluxes,
-            s=20,
+            s=50,
             c=self.plot_epochs,
             cmap="viridis",
             zorder=1000,
+            edgecolor='k',
         )
         fig.colorbar(cdata, label="epoch")
+
+        # and make them not scientific
+        ax.xaxis.set_major_formatter(mticker.ScalarFormatter())
+        if ax.get_ylim()[0] < 0.005:
+            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.1g"))
+        else:
+            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
 
         plt.savefig(
             self.plotpath

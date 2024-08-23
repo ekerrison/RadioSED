@@ -187,10 +187,10 @@ class RadioSEDModel:
         # print('posterior shape!')
         # print(self.result.posterior[self.result.search_parameter_keys].shape)
         # print(self.result.posterior[self.result.search_parameter_keys])
-        # try:
-        self.result.plot_corner(dpi=150)
-        # except:
-        #    pass
+        try:
+            self.result.plot_corner(dpi=150)
+        except:
+            pass
         # return self.result
         return
 
