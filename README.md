@@ -90,7 +90,7 @@ summary .csv will appear under `output/data`.
 
 ## Citation
 
-If this code is of any use to you in your research, please use the DOI to cite it directly (DOI:10.5281/zenodo.8336847). You can cite either the latest release, or a specific release which your research made use of. We would also appreciate a reference to our forthcoming paper (details coming soon!).
+If this code is of any use to you in your research, please use the DOI to cite it directly (DOI:10.5281/zenodo.8336847). You can cite either the latest release, or a specific release which your research made use of. We would also appreciate a reference to our paper Kerrison et al. 2024 (DOI:10.1093/mnras/stae1796).
 
 ## License
 
