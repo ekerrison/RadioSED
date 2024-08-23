@@ -119,6 +119,7 @@ class AuxInfo:
 
         src_name = src_name.replace("RACS-DR1 ", "")
         res = Vizier.query_object(src_name, catalog=racs_viz)[0].to_pandas()
+        res = res[res['RACS-DR1'] == src_name]
         n_gaus = res["Ng"].values[0]
         fluxratio = res["Fpk"].values[0] / res["Ftot"].values[0]
 
@@ -167,7 +168,7 @@ class AuxInfo:
             res = Vizier.query_object(iau_name, catalog=racs_viz)[0].to_pandas()
         except IndexError as e:
             print("No RACS source found within 1 arcminute of {}".format(iau_name))
-            return -1, -1, -1, -1
+            return -1, -1, -1, -1, -1
 
         # separation = np.sqrt((res['RAJ2000'] - ra)**2 + (res['DEJ2000'] - dec)**2)*(60*60)
         racs_coord = Coord.SkyCoord(

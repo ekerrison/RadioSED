@@ -51,7 +51,7 @@ parser.add_argument('-c', '--custom_data_file', help='''Use custom flux density 
                     at the location specified for a given source.''')
 parser.add_argument('-w', '--write_output', help='''Write numerical output to file at the specified location.
                     Default is to write to summary_data.csv under output/data/.''', nargs='?', 
-                    const= '../output/data/summary_data.csv', type=str)
+                    const= './output/data/summary_data.csv', type=str)
 parser.add_argument('--max_freq', help='''Change the maximum frequency to which RadioSED will
                     fit master_data (in Hz).''', default=5e11)
 parser.add_argument('-u', '--use_local', help='''Perform fitting using locally
@@ -70,13 +70,14 @@ col_list = ['obj_name', 'iau_name', 'ra', 'dec', 'peaked_spectrum', 'retrig_spec
  'alpha_thick', 'alpha_thick_m', 'alpha_thick_p', 'alpha_thin', 'alpha_thin_m', 'alpha_thin_p', \
  'alpha_retrig', 'alpha_retrig_m', 'alpha_retrig_p', 'trough_flux', 'trough_flux_m', \
  'trough_flux_p', 'trough_freq', 'trough_freq_m', 'trough_freq_p', 'peak_outofrange', 'trough_outofrange', \
- 'snorm', 'snorm_m', 'snorm_p']
+ 'snorm', 'snorm_m', 'snorm_p', 'original_name','racs_low_flux', 'racs_low_flux_err', 'max_obs_freq', \
+ 'min_obs_freq', 'n_above_peak', 'n_below_peak']
 
 #if we are writing to file, make sure the folder exists
 if args.write_output is not None:
     fname = args.write_output
-    if not os.path.dirname(args.write_output):
-        os.makedirs(args.write_output, exist_ok=True)
+    if not os.path.isdir(os.path.dirname(args.write_output)):
+        os.makedirs(os.path.dirname(args.write_output), exist_ok=True)
 
     if not os.path.isfile(args.write_output):
         with open(args.write_output, 'w+') as f:
@@ -92,6 +93,7 @@ if args.write_output is not None:
     master_data['best_model'] = master_data['best_model'].astype(str)
     master_data['gleam_blended'] = master_data['gleam_blended'].astype(bool)
     master_data['new_only'] = master_data['new_only'].astype(bool)
+    master_data['original_name'] = master_data['original_name'].astype(str)
     dummy_idx = 0
     count = 0
 
@@ -138,9 +140,9 @@ if args.file is None:
 
     #get the flux master_data
     if args.use_local:
-        flux_data, peak_flux_data, alma_variable, racs_id = parser.retrieve_fluxdata_local(racs_id = racs_id)
+        flux_data, peak_flux_data, alma_variable, racs_id, alma_vi = parser.retrieve_fluxdata_local(racs_id = racs_id)
     elif not args.use_local and args.custom_data_file is None:
-        flux_data, peak_flux_data, alma_variable = parser.retrieve_fluxdata_remote(iau_name = src_iau_name,
+        flux_data, peak_flux_data, alma_variable, alma_vi = parser.retrieve_fluxdata_remote(iau_name = src_iau_name,
         racs_id = racs_id, ra=src_ra, dec=src_dec)
     else:
         flux_data = pd.read_csv(args.custom_data_file)
@@ -198,22 +200,28 @@ if args.file is None:
         plotter.plot_best_model()
 
     #if we are writing to output, collect in a master_dataFrame and save
-    if args.write_output:
+    if args.write_output is not None:
         master_data.loc[dummy_idx, 'obj_name'] = racs_id
         master_data.loc[dummy_idx, 'iau_name'] = src_iau_name
         master_data.loc[dummy_idx, 'ra'] = src_ra
         master_data.loc[dummy_idx, 'dec'] = src_dec
         master_data.loc[dummy_idx, 'n_flux'] = flux_data.shape[0]
-        master_data.loc[dummy_idx, 'peaked_spectrum'] = 'lin' not in result_array[0].model_type
+        master_data.loc[dummy_idx, 'peaked_spectrum'] = 'PL' not in result_array[0].model_type
         master_data.loc[dummy_idx, 'retrig_spectrum'] = 'retrig' in result_array[0].model_type
         master_data.loc[dummy_idx, 'racs_extended'] = racs_fluxratio
         master_data.loc[dummy_idx, 'n_gaus_racs'] =  racs_n_gaus
         master_data.loc[dummy_idx, 'n_flux'] = flux_data.shape[0]
         master_data.loc[dummy_idx, 'n_flux_new'] = ''
         master_data.loc[dummy_idx, 'new_only'] = False
+        if args.name is not None:
+            master_data.loc[dummy_idx, 'original_name'] = args.name
+        elif args.ned_name is not None:
+            master_data.loc[dummy_idx, 'original_name'] = args.ned_name
+        elif args.id is not None:
+            master_data.loc[dummy_idx, 'original_name'] = args.id
 
 
-        master_data.loc[dummy_idx, 'gleam_blended'] =  gleam_blending_flag
+        master_data.loc[dummy_idx, 'gleam_blended'] =  gleam_blending_flag[0]
         master_data.loc[dummy_idx, 'gleam_fluxratio'] = gleam_fluxratio
         master_data.loc[dummy_idx, 'at20g_compact'] =  at20g_compactness
         master_data.loc[dummy_idx, 'at20g_visibility'] =  at20g_visibility
@@ -225,9 +233,9 @@ if args.file is None:
         master_data.loc[dummy_idx, 'best_model'] = result_array[0].model_type
         master_data.loc[dummy_idx, 'best_model_log10Z'] = log10z_arr[0]
         if "GLEAM" in flux_data["Survey quickname"].tolist():
-            master_data.loc[dummy_idx, 'linear_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'lin' in s][0]]
-            master_data.loc[dummy_idx, 'orienti_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'orient' in s][0]]
-            master_data.loc[dummy_idx, 'snellen_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'snellen' in s][0]]
+            master_data.loc[dummy_idx, 'linear_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'PL' in s][0]]
+            master_data.loc[dummy_idx, 'orienti_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'curv' in s][0]]
+            master_data.loc[dummy_idx, 'snellen_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'PS' in s][0]]
             master_data.loc[dummy_idx, 'retrig_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'retrig' in s][0]]
 
             master_data.loc[dummy_idx, 'linear_nested_log10z'] = np.nan
@@ -236,9 +244,9 @@ if args.file is None:
             master_data.loc[dummy_idx, 'retrig_nested_log10z'] = np.nan
         
         else:
-            master_data.loc[dummy_idx, 'linear_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'lin' in s][0]]
-            master_data.loc[dummy_idx, 'orienti_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'orient' in s][0]]
-            master_data.loc[dummy_idx, 'snellen_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'snell' in s][0]]
+            master_data.loc[dummy_idx, 'linear_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'PL' in s][0]]
+            master_data.loc[dummy_idx, 'orienti_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'curv' in s][0]]
+            master_data.loc[dummy_idx, 'snellen_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'PS' in s][0]]
             master_data.loc[dummy_idx, 'retrig_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'retrig' in s][0]]
             
             master_data.loc[dummy_idx, 'linear_gp_log10z'] = np.nan
@@ -247,7 +255,7 @@ if args.file is None:
             master_data.loc[dummy_idx, 'retrig_gp_log10z'] = np.nan
 
 
-        if 'lin' not in result_array[0].model_type:
+        if 'PL' not in result_array[0].model_type:
             master_data.loc[dummy_idx, 'peak_flux'] = fit_params[fit_param_names.index('peak_flux')].median
             master_data.loc[dummy_idx, 'peak_flux_m'] = fit_params[fit_param_names.index('peak_flux')].minus
             master_data.loc[dummy_idx, 'peak_flux_p'] = fit_params[fit_param_names.index('peak_flux')].plus
@@ -319,6 +327,8 @@ elif args.file:
         #get flux master_data
         if 'IAU_designation' in input_data.columns:
             src_iau_name, ra, dec, separation, racs_id = info.resolve_name_generic(iau_name = input_data.loc[src_idx, 'IAU_designation'])
+            src_ra = ra
+            src_dec = dec
 
         elif 'NED_name' in input_data.columns:
             racs_name, ra, dec = info.find_racs_src(ned_name = input_data.loc[src_idx, 'NED_name'])
@@ -329,16 +339,20 @@ elif args.file:
             src_iau_name, src_ra, src_dec, separation, racs_id = info.resolve_name_generic(iau_name = racs_name)
 
 
+        if src_iau_name == -1:
+            continue
+
+        print('now fitting {}'.format(src_iau_name))
+
         #get the flux master_data
         if args.use_local:
-            flux_data, peak_flux_data, alma_variable, racs_id = parser.retrieve_fluxdata_local(racs_id = racs_id)
+            flux_data, peak_flux_data, alma_variable, racs_id, alma_vi = parser.retrieve_fluxdata_local(racs_id = racs_id)
         elif not args.use_local and args.custom_data_file is None:
-            flux_data, peak_flux_data, alma_variable = parser.retrieve_fluxdata_remote(iau_name = src_iau_name,
+            flux_data, peak_flux_data, alma_variable, alma_vi = parser.retrieve_fluxdata_remote(iau_name = src_iau_name,
             racs_id = racs_id, ra=ra, dec=dec)
         else:
             flux_data = pd.read_csv(args.custom_data_file)
 
-        #run fitting
 
         #other useful diagnostics
         # get auxiliary info about the source compactness and possible blending
@@ -351,6 +365,9 @@ elif args.file:
         #remove bottom GLEAM bands if there is likely confusion
         if gleam_blending_flag[0] == True:
             flux_data = flux_data[flux_data['Frequency (Hz)'] > 1e8]
+
+        #write flux data to file for reference
+        flux_data.to_csv('./output/data/{}_fluxdata.csv'.format(src_iau_name), header = True, index = False)
 
 
         # now initialise fitter
@@ -391,103 +408,107 @@ elif args.file:
             plotter.plot_publication()
             plotter.plot_best_model()
 
-    #write to file if we are writing
-    #if we are writing to output, collect in a master_dataFrame and save
-    if args.write_output:
-        master_data.loc[dummy_idx, 'obj_name'] = racs_id
-        master_data.loc[dummy_idx, 'iau_name'] = src_iau_name
-        master_data.loc[dummy_idx, 'ra'] = src_ra
-        master_data.loc[dummy_idx, 'dec'] = src_dec
-        master_data.loc[dummy_idx, 'n_flux'] = flux_data.shape[0]
-        master_data.loc[dummy_idx, 'peaked_spectrum'] = 'lin' not in result_array[0].model_type
-        master_data.loc[dummy_idx, 'retrig_spectrum'] = 'retrig' in result_array[0].model_type
-        master_data.loc[dummy_idx, 'racs_extended'] = racs_fluxratio
-        master_data.loc[dummy_idx, 'n_gaus_racs'] =  racs_n_gaus
-        master_data.loc[dummy_idx, 'n_flux'] = flux_data.shape[0]
-        master_data.loc[dummy_idx, 'n_flux_new'] = ''
-        master_data.loc[dummy_idx, 'new_only'] = False
+        #write to file if we are writing
+        #if we are writing to output, collect in a master_dataFrame and save
+        if args.write_output is not None:
+            master_data.loc[dummy_idx, 'obj_name'] = racs_id
+            master_data.loc[dummy_idx, 'iau_name'] = src_iau_name
+            master_data.loc[dummy_idx, 'ra'] = src_ra
+            master_data.loc[dummy_idx, 'dec'] = src_dec
+            master_data.loc[dummy_idx, 'n_flux'] = flux_data.shape[0]
+            master_data.loc[dummy_idx, 'peaked_spectrum'] = 'PL' not in result_array[0].model_type
+            master_data.loc[dummy_idx, 'retrig_spectrum'] = 'retrig' in result_array[0].model_type
+            master_data.loc[dummy_idx, 'racs_extended'] = racs_fluxratio
+            master_data.loc[dummy_idx, 'n_gaus_racs'] =  racs_n_gaus
+            master_data.loc[dummy_idx, 'n_flux'] = flux_data.shape[0]
+            master_data.loc[dummy_idx, 'n_flux_new'] = ''
+            master_data.loc[dummy_idx, 'new_only'] = False
+            if 'IAU_designation' in input_data.columns:
+                master_data.loc[dummy_idx, 'original_name'] = input_data.loc[src_idx, 'IAU_designation']
+            elif 'NED_name' in input_data.columns:
+                master_data.loc[dummy_idx, 'original_name'] = input_data.loc[src_idx, 'NED_name']
 
 
-        master_data.loc[dummy_idx, 'gleam_blended'] =  gleam_blending_flag
-        master_data.loc[dummy_idx, 'gleam_fluxratio'] = gleam_fluxratio
-        master_data.loc[dummy_idx, 'at20g_compact'] =  at20g_compactness
-        master_data.loc[dummy_idx, 'at20g_visibility'] =  at20g_visibility
+            master_data.loc[dummy_idx, 'gleam_blended'] =  gleam_blending_flag[0]
+            master_data.loc[dummy_idx, 'gleam_fluxratio'] = gleam_fluxratio
+            master_data.loc[dummy_idx, 'at20g_compact'] =  at20g_compactness
+            master_data.loc[dummy_idx, 'at20g_visibility'] =  at20g_visibility
 
-        #add racs flux
-        master_data.loc[dummy_idx, 'racs_low_flux'] = flux_data.loc[flux_data['Survey quickname'] == 'RACS', 'Flux Density (Jy)'].values[0] 
-        master_data.loc[dummy_idx, 'racs_low_flux_err'] = flux_data.loc[flux_data['Survey quickname'] == 'RACS', 'Uncertainty'].values[0]
+            #add racs flux
+            master_data.loc[dummy_idx, 'racs_low_flux'] = flux_data.loc[flux_data['Survey quickname'] == 'RACS', 'Flux Density (Jy)'].values[0] 
+            master_data.loc[dummy_idx, 'racs_low_flux_err'] = flux_data.loc[flux_data['Survey quickname'] == 'RACS', 'Uncertainty'].values[0]
 
-        master_data.loc[dummy_idx, 'best_model'] = result_array[0].model_type
-        master_data.loc[dummy_idx, 'best_model_log10Z'] = log10z_arr[0]
-        if "GLEAM" in flux_data["Survey quickname"].tolist():
-            master_data.loc[dummy_idx, 'linear_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'lin' in s][0]]
-            master_data.loc[dummy_idx, 'orienti_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'orient' in s][0]]
-            master_data.loc[dummy_idx, 'snellen_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'snellen' in s][0]]
-            master_data.loc[dummy_idx, 'retrig_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'retrig' in s][0]]
+            master_data.loc[dummy_idx, 'best_model'] = result_array[0].model_type
+            master_data.loc[dummy_idx, 'best_model_log10Z'] = log10z_arr[0]
+            if "GLEAM" in flux_data["Survey quickname"].tolist():
+                master_data.loc[dummy_idx, 'linear_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'PL' in s][0]]
+                master_data.loc[dummy_idx, 'orienti_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'curv' in s][0]]
+                master_data.loc[dummy_idx, 'snellen_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'PS' in s][0]]
+                master_data.loc[dummy_idx, 'retrig_gp_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'retrig' in s][0]]
 
-            master_data.loc[dummy_idx, 'linear_nested_log10z'] = np.nan
-            master_data.loc[dummy_idx, 'orienti_nested_log10z'] = np.nan
-            master_data.loc[dummy_idx, 'snellen_nested_log10z'] = np.nan
-            master_data.loc[dummy_idx, 'retrig_nested_log10z'] = np.nan
-        
-        else:
-            master_data.loc[dummy_idx, 'linear_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'lin' in s][0]]
-            master_data.loc[dummy_idx, 'orienti_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'orient' in s][0]]
-            master_data.loc[dummy_idx, 'snellen_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'snell' in s][0]]
-            master_data.loc[dummy_idx, 'retrig_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'retrig' in s][0]]
+                master_data.loc[dummy_idx, 'linear_nested_log10z'] = np.nan
+                master_data.loc[dummy_idx, 'orienti_nested_log10z'] = np.nan
+                master_data.loc[dummy_idx, 'snellen_nested_log10z'] = np.nan
+                master_data.loc[dummy_idx, 'retrig_nested_log10z'] = np.nan
             
-            master_data.loc[dummy_idx, 'linear_gp_log10z'] = np.nan
-            master_data.loc[dummy_idx, 'orienti_gp_log10z'] = np.nan
-            master_data.loc[dummy_idx, 'snellen_gp_log10z'] = np.nan
-            master_data.loc[dummy_idx, 'retrig_gp_log10z'] = np.nan
+            else:
+                master_data.loc[dummy_idx, 'linear_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'PL' in s][0]]
+                master_data.loc[dummy_idx, 'orienti_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'curv' in s][0]]
+                master_data.loc[dummy_idx, 'snellen_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'PS' in s][0]]
+                master_data.loc[dummy_idx, 'retrig_nested_log10z'] = log10z_arr[[idx for idx, s in enumerate(model_type_arr) if 'retrig' in s][0]]
+                
+                master_data.loc[dummy_idx, 'linear_gp_log10z'] = np.nan
+                master_data.loc[dummy_idx, 'orienti_gp_log10z'] = np.nan
+                master_data.loc[dummy_idx, 'snellen_gp_log10z'] = np.nan
+                master_data.loc[dummy_idx, 'retrig_gp_log10z'] = np.nan
 
 
-        if 'lin' not in result_array[0].model_type:
-            master_data.loc[dummy_idx, 'peak_flux'] = fit_params[fit_param_names.index('peak_flux')].median
-            master_data.loc[dummy_idx, 'peak_flux_m'] = fit_params[fit_param_names.index('peak_flux')].minus
-            master_data.loc[dummy_idx, 'peak_flux_p'] = fit_params[fit_param_names.index('peak_flux')].plus
-            master_data.loc[dummy_idx, 'peak_freq'] = fit_params[fit_param_names.index('peak_freq')].median
-            master_data.loc[dummy_idx, 'peak_freq_m'] = fit_params[fit_param_names.index('peak_freq')].minus
-            master_data.loc[dummy_idx, 'peak_freq_p'] = fit_params[fit_param_names.index('peak_freq')].plus
-            master_data.loc[dummy_idx, 'alpha_thick'] = fit_params[fit_param_names.index('alpha_thick')].median
-            master_data.loc[dummy_idx, 'alpha_thick_m'] = fit_params[fit_param_names.index('alpha_thick')].minus
-            master_data.loc[dummy_idx, 'alpha_thick_p'] = fit_params[fit_param_names.index('alpha_thick')].plus
-            master_data.loc[dummy_idx, 'alpha_thin'] = fit_params[fit_param_names.index('alpha_thin')].median
-            master_data.loc[dummy_idx, 'alpha_thin_m'] = fit_params[fit_param_names.index('alpha_thin')].minus
-            master_data.loc[dummy_idx, 'alpha_thin_p'] = fit_params[fit_param_names.index('alpha_thin')].plus
-            #get highest and lowest flux density
-            master_data.loc[dummy_idx, 'max_obs_freq'] = flux_data['Frequency (Hz)'].max()
-            master_data.loc[dummy_idx, 'min_obs_freq'] = flux_data['Frequency (Hz)'].min()
+            if 'PL' not in result_array[0].model_type:
+                master_data.loc[dummy_idx, 'peak_flux'] = fit_params[fit_param_names.index('peak_flux')].median
+                master_data.loc[dummy_idx, 'peak_flux_m'] = fit_params[fit_param_names.index('peak_flux')].minus
+                master_data.loc[dummy_idx, 'peak_flux_p'] = fit_params[fit_param_names.index('peak_flux')].plus
+                master_data.loc[dummy_idx, 'peak_freq'] = fit_params[fit_param_names.index('peak_freq')].median
+                master_data.loc[dummy_idx, 'peak_freq_m'] = fit_params[fit_param_names.index('peak_freq')].minus
+                master_data.loc[dummy_idx, 'peak_freq_p'] = fit_params[fit_param_names.index('peak_freq')].plus
+                master_data.loc[dummy_idx, 'alpha_thick'] = fit_params[fit_param_names.index('alpha_thick')].median
+                master_data.loc[dummy_idx, 'alpha_thick_m'] = fit_params[fit_param_names.index('alpha_thick')].minus
+                master_data.loc[dummy_idx, 'alpha_thick_p'] = fit_params[fit_param_names.index('alpha_thick')].plus
+                master_data.loc[dummy_idx, 'alpha_thin'] = fit_params[fit_param_names.index('alpha_thin')].median
+                master_data.loc[dummy_idx, 'alpha_thin_m'] = fit_params[fit_param_names.index('alpha_thin')].minus
+                master_data.loc[dummy_idx, 'alpha_thin_p'] = fit_params[fit_param_names.index('alpha_thin')].plus
+                #get highest and lowest flux density
+                master_data.loc[dummy_idx, 'max_obs_freq'] = flux_data['Frequency (Hz)'].max()
+                master_data.loc[dummy_idx, 'min_obs_freq'] = flux_data['Frequency (Hz)'].min()
 
-            #get number of points above and below the peak
-            master_data.loc[dummy_idx, 'n_above_peak'] = flux_data[flux_data['Frequency (Hz)'] > fit_params[fit_param_names.index('peak_freq')].median*1e6].shape[0]
-            master_data.loc[dummy_idx, 'n_below_peak'] = flux_data[flux_data['Frequency (Hz)'] < fit_params[fit_param_names.index('peak_freq')].median*1e6].shape[0]
+                #get number of points above and below the peak
+                master_data.loc[dummy_idx, 'n_above_peak'] = flux_data[flux_data['Frequency (Hz)'] > fit_params[fit_param_names.index('peak_freq')].median*1e6].shape[0]
+                master_data.loc[dummy_idx, 'n_below_peak'] = flux_data[flux_data['Frequency (Hz)'] < fit_params[fit_param_names.index('peak_freq')].median*1e6].shape[0]
 
 
-            if 'retrig' in result_array[0].model_type:
-                master_data.loc[dummy_idx, 'alpha_retrig'] = fit_params[fit_param_names.index('alpha_retrig')].median
-                master_data.loc[dummy_idx, 'alpha_retrig_m'] = fit_params[fit_param_names.index('alpha_retrig')].minus
-                master_data.loc[dummy_idx, 'alpha_retrig_p'] = fit_params[fit_param_names.index('alpha_retrig')].plus
-                master_data.loc[dummy_idx, 'trough_flux'] = fit_params[fit_param_names.index('trough_flux')].median
-                master_data.loc[dummy_idx, 'trough_flux_m'] = fit_params[fit_param_names.index('trough_flux')].minus
-                master_data.loc[dummy_idx, 'trough_flux_p'] = fit_params[fit_param_names.index('trough_flux')].plus
-                master_data.loc[dummy_idx, 'trough_freq'] = fit_params[fit_param_names.index('trough_freq')].median
-                master_data.loc[dummy_idx, 'trough_freq_m'] = fit_params[fit_param_names.index('trough_freq')].minus
-                master_data.loc[dummy_idx, 'trough_freq_p'] = fit_params[fit_param_names.index('trough_freq')].plus
-                master_data.loc[dummy_idx, 'peak_outofrange'] = (fit_params[fit_param_names.index('peak_freq')].median > flux_data['Frequency (Hz)'].max()*1e6) or (fit_params[fit_param_names.index('peak_freq')].median < flux_data['Frequency (Hz)'].min()*1e6)
-                master_data.loc[dummy_idx, 'trough_outofrange'] = (fit_params[fit_param_names.index('trough_freq')].median > flux_data['Frequency (Hz)'].max()*1e6) or (fit_params[fit_param_names.index('trough_freq')].median < flux_data['Frequency (Hz)'].min()*1e6)
-        else:
-            master_data.loc[dummy_idx, 'snorm'] = fit_params[fit_param_names.index('S_norm')].median
-            master_data.loc[dummy_idx, 'snorm_m'] = fit_params[fit_param_names.index('S_norm')].minus
-            master_data.loc[dummy_idx, 'snorm_p'] = fit_params[fit_param_names.index('S_norm')].plus
+                if 'retrig' in result_array[0].model_type:
+                    master_data.loc[dummy_idx, 'alpha_retrig'] = fit_params[fit_param_names.index('alpha_retrig')].median
+                    master_data.loc[dummy_idx, 'alpha_retrig_m'] = fit_params[fit_param_names.index('alpha_retrig')].minus
+                    master_data.loc[dummy_idx, 'alpha_retrig_p'] = fit_params[fit_param_names.index('alpha_retrig')].plus
+                    master_data.loc[dummy_idx, 'trough_flux'] = fit_params[fit_param_names.index('trough_flux')].median
+                    master_data.loc[dummy_idx, 'trough_flux_m'] = fit_params[fit_param_names.index('trough_flux')].minus
+                    master_data.loc[dummy_idx, 'trough_flux_p'] = fit_params[fit_param_names.index('trough_flux')].plus
+                    master_data.loc[dummy_idx, 'trough_freq'] = fit_params[fit_param_names.index('trough_freq')].median
+                    master_data.loc[dummy_idx, 'trough_freq_m'] = fit_params[fit_param_names.index('trough_freq')].minus
+                    master_data.loc[dummy_idx, 'trough_freq_p'] = fit_params[fit_param_names.index('trough_freq')].plus
+                    master_data.loc[dummy_idx, 'peak_outofrange'] = (fit_params[fit_param_names.index('peak_freq')].median > flux_data['Frequency (Hz)'].max()*1e6) or (fit_params[fit_param_names.index('peak_freq')].median < flux_data['Frequency (Hz)'].min()*1e6)
+                    master_data.loc[dummy_idx, 'trough_outofrange'] = (fit_params[fit_param_names.index('trough_freq')].median > flux_data['Frequency (Hz)'].max()*1e6) or (fit_params[fit_param_names.index('trough_freq')].median < flux_data['Frequency (Hz)'].min()*1e6)
+            else:
+                master_data.loc[dummy_idx, 'snorm'] = fit_params[fit_param_names.index('S_norm')].median
+                master_data.loc[dummy_idx, 'snorm_m'] = fit_params[fit_param_names.index('S_norm')].minus
+                master_data.loc[dummy_idx, 'snorm_p'] = fit_params[fit_param_names.index('S_norm')].plus
 
-            master_data.loc[dummy_idx, 'alpha_thin'] = fit_params[fit_param_names.index('alpha')].median
-            master_data.loc[dummy_idx, 'alpha_thin'] = fit_params[fit_param_names.index('alpha')].minus
-            master_data.loc[dummy_idx, 'alpha_thin'] = fit_params[fit_param_names.index('alpha')].plus
+                master_data.loc[dummy_idx, 'alpha_thin'] = fit_params[fit_param_names.index('alpha')].median
+                master_data.loc[dummy_idx, 'alpha_thin'] = fit_params[fit_param_names.index('alpha')].minus
+                master_data.loc[dummy_idx, 'alpha_thin'] = fit_params[fit_param_names.index('alpha')].plus
 
-        #increment dummy index for writing output
-        dummy_idx += 1
-    
+            #increment dummy index for writing output
+            dummy_idx += 1
+        
     #now save!
     write_mode = ('a' if not args.overwrite else 'w')
     master_data.to_csv(args.write_output, mode = write_mode, header = False, index = False)

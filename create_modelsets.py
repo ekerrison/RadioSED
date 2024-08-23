@@ -84,7 +84,7 @@ snellen_dict = {
 # retriggered PS model
 retrig_dict = {
     "has_GLEAM": False,
-    "model_type": "retrggered",
+    "model_type": "retriggered",
     "model_func": retriggered_sed_func,
     "plot_colour": "darkviolet",
     "prior_obj": priors.retrig_prior(),
