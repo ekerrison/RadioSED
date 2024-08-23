@@ -77,6 +77,7 @@ Please note that to perform the default, 4-model inference on one source can tak
 ## Examples
 There are some example data and input files located in the `example_files/` directory. They can be used to understand several RadioSED options which can be tested with the following code:
 - Running RadioSED from the command line on a single source and produce output plots: `python radiosed.py -n J213437.6-235535 -p`
+- the same as above but for a more interesting source: `python radiosed.py -n MRC0023-482 -p`
 - Running RadioSED from the command line on a number of sources stored in an input file: `python radiosed.py -f example_files/input_sources.csv`
 - Running RadioSED from the command line on a single source with censored data: `python radiosed.py -n J090331.3+010849 -c example_files/J090331.3+010849_flux_table_censored.csv`
 
