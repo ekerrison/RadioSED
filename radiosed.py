@@ -366,10 +366,8 @@ elif args.file:
         if gleam_blending_flag[0] == True:
             flux_data = flux_data[flux_data['Frequency (Hz)'] > 1e8]
 
-        #REMOVE BEFORE COMMITTING:
+        #write flux data to file for reference
         flux_data.to_csv('./output/data/{}_fluxdata.csv'.format(src_iau_name), header = True, index = False)
-        #run fitting
-        #continue
 
 
         # now initialise fitter
