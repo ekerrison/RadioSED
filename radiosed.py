@@ -311,7 +311,7 @@ if args.file is None:
 elif args.file:
     input_data = pd.read_csv(args.file, header = 0)
     print(input_data)
-    if not (('RA' not in input_data.columns and 'Dec' not in input_data.columns) or \
+    if (('RA' not in input_data.columns and 'Dec' not in input_data.columns) or \
          'IAU_designation' not in input_data.columns or 'NED_name' not in input_data.columns):
          print('''Format of input file not recognised. Please make sure it is in a format that can 
          be parsed by pandas, with at least one of:
@@ -329,11 +329,15 @@ elif args.file:
 
     for src_idx in input_data.index.tolist():
         #get flux master_data
-        if 'IAU_designation' in input_data.columns:
+        if 'IAU_designation' in input_data.columns and args.custom_data_file is None:
             src_iau_name, ra, dec, separation, racs_id = info.resolve_name_generic(iau_name = input_data.loc[src_idx, 'IAU_designation'])
             src_ra = ra
             src_dec = dec
-
+        elif 'IAU_designation' in input_data.columns and args.custom_data_file is not None:
+            src_iau_name = input_data.loc[src_idx, 'IAU_designation']
+            print(input_data.columns.tolist())
+            ra = input_data.loc[src_idx, 'RA']
+            dec = input_data.loc[src_idx, 'Dec']
         elif 'NED_name' in input_data.columns:
             racs_name, ra, dec = info.find_racs_src(ned_name = input_data.loc[src_idx, 'NED_name'])
             src_iau_name, src_ra, src_dec, separation, racs_id = info.resolve_name_generic(iau_name = racs_name)
@@ -354,6 +358,19 @@ elif args.file:
         elif not args.use_local and args.custom_data_file is None:
             flux_data, peak_flux_data, alma_variable, alma_vi = parser.retrieve_fluxdata_remote(iau_name = src_iau_name,
             racs_id = racs_id, ra=ra, dec=dec)
+
+            #other useful diagnostics
+            # get auxiliary info about the source compactness and possible blending
+            racs_n_gaus, racs_fluxratio = info.check_racs_compactness(src_name = src_iau_name) 
+            gleam_blending_flag = info.check_confusion(src_name = src_iau_name)
+            gleam_fluxratio, gleam_sep = info.check_gleam_compactness(src_name = src_iau_name)
+            racs_n_gaus, racs_fluxratio = info.check_racs_compactness(src_name = src_iau_name) 
+            at20g_compactness, at20g_visibility, at20g_sep = info.check_at20g_compactness(src_name = src_iau_name)
+
+            #remove bottom GLEAM bands if there is likely confusion
+            if gleam_blending_flag[0] == True:
+                flux_data = flux_data[flux_data['Frequency (Hz)'] > 1e8]
+                
         else:
             #get the custom data file starting with the IAU_designation name
             try:
@@ -366,18 +383,6 @@ elif args.file:
                 print('Cannot find custom data file for source {} in directory {}'.format(input_data.loc[src_idx, 'IAU_designation'], args.custom_data_file))
                 continue
 
-
-        #other useful diagnostics
-        # get auxiliary info about the source compactness and possible blending
-        racs_n_gaus, racs_fluxratio = info.check_racs_compactness(src_name = src_iau_name) 
-        gleam_blending_flag = info.check_confusion(src_name = src_iau_name)
-        gleam_fluxratio, gleam_sep = info.check_gleam_compactness(src_name = src_iau_name)
-        racs_n_gaus, racs_fluxratio = info.check_racs_compactness(src_name = src_iau_name) 
-        at20g_compactness, at20g_visibility, at20g_sep = info.check_at20g_compactness(src_name = src_iau_name)
-
-        #remove bottom GLEAM bands if there is likely confusion
-        if gleam_blending_flag[0] == True:
-            flux_data = flux_data[flux_data['Frequency (Hz)'] > 1e8]
 
         #write flux data to file for reference
         flux_data.to_csv('./output/data/{}_fluxdata.csv'.format(src_iau_name), header = True, index = False)
