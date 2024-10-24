@@ -48,7 +48,9 @@ parser.add_argument('-o', '--overwrite', help='''Overwrite any previous fit and 
                 fitting will be resumed if it was interrupted, and only plots will be regenerated.''',
                 action='store_true')
 parser.add_argument('-c', '--custom_data_file', help='''Use custom flux density master_data
-                    at the location specified for a given source.''')
+                    at the location specified for a given source. NOTE: if you are using this in combination with
+                    the -f flag for an input file, then this should specify the directory containing all custom data
+                    files, rather than the path of an individual file.''')
 parser.add_argument('-w', '--write_output', help='''Write numerical output to file at the specified location.
                     Default is to write to summary_data.csv under output/data/.''', nargs='?', 
                     const= './output/data/summary_data.csv', type=str)
@@ -148,6 +150,8 @@ if args.file is None:
         flux_data = pd.read_csv(args.custom_data_file)
         peak_flux_data = None
 
+    #write flux data to file for reference
+    flux_data.to_csv('./output/data/{}_fluxdata.csv'.format(src_iau_name), header = True, index = False)
 
     #other useful diagnostics
     # get auxiliary info about the source compactness and possible blending
@@ -351,7 +355,16 @@ elif args.file:
             flux_data, peak_flux_data, alma_variable, alma_vi = parser.retrieve_fluxdata_remote(iau_name = src_iau_name,
             racs_id = racs_id, ra=ra, dec=dec)
         else:
-            flux_data = pd.read_csv(args.custom_data_file)
+            #get the custom data file starting with the IAU_designation name
+            try:
+                files = os.listdir(args.custom_data_file)
+                fname = [x for x in files if x.startswith(input_data.loc[src_idx, 'IAU_designation'])]
+                fpath = os.path.join(args.custom_data_file, fname[0])
+                flux_data = pd.read_csv(fpath)
+                peak_flux_data = None
+            except:
+                print('Cannot find custom data file for source {} in directory {}'.format(input_data.loc[src_idx, 'IAU_designation'], args.custom_data_file))
+                continue
 
 
         #other useful diagnostics
