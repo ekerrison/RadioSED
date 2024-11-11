@@ -48,7 +48,7 @@ RadioSED is tested with Python 3.10. If you are familiar with Anaconda environme
 > `conda activate radiosed`
 
 Then you will need to install all of the dependencies for RadioSED. At the simplest level there are four main packages required:
-- [Bilby](https://lscsoft.docs.ligo.org/bilby/#) (version 2.1 for gauranteed compatibility)
+- [Bilby](https://lscsoft.docs.ligo.org/bilby/#) (version 2.1 for guaranteed compatibility)
 - [George](https://george.readthedocs.io/en/latest/)
 - [Dynesty](https://dynesty.readthedocs.io/en/latest/index.html) (version 2.1.2 for compatibility with Bilby)
 - [Astroquery](https://astroquery.readthedocs.io/en/latest/)
