@@ -2,6 +2,8 @@
 
 [![DOI](https://zenodo.org/badge/682385260.svg)](https://zenodo.org/badge/latestdoi/682385260)
 
+## Update 22 June 2026 - I will be improving the interface to RadioSED over the next few months (some of the dependencies have had substantial updates since this was first written, and I have had some feedback that it is becoming difficult to install). Stay tuned or get in touch if you'd like to get started immediately!
+
 ## A Bayesian Nested Sampling approach to radio SED fitting for AGN.
 
 This package uses nested sampling ([Skilling 2004](https://doi.org/10.1063/1.1835238)) to perform a Bayesian analysis of radio SEDs constructed from radio flux density measurements
